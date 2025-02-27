@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import site.haruhana.www.entity.AuthProvider;
+import site.haruhana.www.entity.Role;
+import site.haruhana.www.entity.User;
 
 import java.util.Map;
 
@@ -98,6 +100,24 @@ public class OAuthAttributes {
                 .name((String) response.get("name"))
                 .email((String) response.get("email"))
                 .profileImageUrl((String) response.get("profile_image"))
+                .build();
+    }
+
+    /**
+     * OAuthAttributes 정보를 기반으로 User 엔티티 생성하는 메서드
+     * <p>
+     * 소셜 로그인 사용자의 경우 이메일을 임시 비밀번호로 사용하며,
+     * 기본 권한은 USER로 설정됨
+     *
+     * @return 생성된 User 엔티티
+     */
+    public User toEntity() {
+        return User.builder()
+                .name(name)
+                .email(email)
+                .provider(provider)
+                .profileImageUrl(profileImageUrl)
+                .role(Role.USER)
                 .build();
     }
 
