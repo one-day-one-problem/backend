@@ -6,8 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import site.haruhana.www.dto.TokenDto;
-import site.haruhana.www.entity.Role;
-import site.haruhana.www.entity.User;
+import site.haruhana.www.entity.user.Role;
+import site.haruhana.www.entity.user.User;
 import site.haruhana.www.repository.UserRepository;
 
 import javax.crypto.SecretKey;

@@ -1,8 +1,8 @@
 package site.haruhana.www.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import site.haruhana.www.entity.User;
-import site.haruhana.www.entity.AuthProvider;
+import site.haruhana.www.entity.user.User;
+import site.haruhana.www.entity.user.AuthProvider;
 
 import java.util.Optional;
 

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import site.haruhana.www.entity.Role;
+import site.haruhana.www.entity.user.Role;
 
 import java.util.Date;
 

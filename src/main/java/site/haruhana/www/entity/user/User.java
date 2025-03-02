@@ -1,10 +1,11 @@
-package site.haruhana.www.entity;
+package site.haruhana.www.entity.user;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import site.haruhana.www.entity.BaseTimeEntity;
 
 @Entity
 @Getter
