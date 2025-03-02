@@ -11,7 +11,7 @@ import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import site.haruhana.www.entity.User;
+import site.haruhana.www.entity.user.User;
 import site.haruhana.www.repository.UserRepository;
 
 import java.util.Collections;

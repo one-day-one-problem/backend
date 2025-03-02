@@ -3,9 +3,9 @@ package site.haruhana.www.oauth;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import site.haruhana.www.entity.AuthProvider;
-import site.haruhana.www.entity.Role;
-import site.haruhana.www.entity.User;
+import site.haruhana.www.entity.user.AuthProvider;
+import site.haruhana.www.entity.user.Role;
+import site.haruhana.www.entity.user.User;
 
 import java.util.Map;
 

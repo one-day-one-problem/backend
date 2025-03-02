@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import site.haruhana.www.entity.User;
+import site.haruhana.www.entity.user.User;
 import site.haruhana.www.entity.problem.Problem;
 
 import java.time.LocalDateTime;
