@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Collections;
 
 @Data
 @Builder
@@ -20,5 +21,22 @@ public class GeminiRequest {
     @Builder
     public static class Part {
         private String text;
+    }
+
+    /**
+     * 프롬프트로 GeminiRequest를 생성하는 팩토리 메서드
+     */
+    public static GeminiRequest of(String prompt) {
+        return GeminiRequest.builder()
+                .contents(Collections.singletonList(
+                        Content.builder()
+                                .parts(Collections.singletonList(
+                                        Part.builder()
+                                                .text(prompt)
+                                                .build()
+                                ))
+                                .build()
+                ))
+                .build();
     }
 }
