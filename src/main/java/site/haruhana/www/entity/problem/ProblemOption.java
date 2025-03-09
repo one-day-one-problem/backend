@@ -30,7 +30,7 @@ public class ProblemOption {
     /**
      * 옵션
      */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Option option;
 
     /**
