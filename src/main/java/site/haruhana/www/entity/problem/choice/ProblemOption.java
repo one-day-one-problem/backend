@@ -1,10 +1,11 @@
-package site.haruhana.www.entity.problem;
+package site.haruhana.www.entity.problem.choice;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import site.haruhana.www.entity.problem.Problem;
 
 @Entity
 @Getter

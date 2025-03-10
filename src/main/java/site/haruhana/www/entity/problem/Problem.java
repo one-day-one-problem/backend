@@ -3,6 +3,8 @@ package site.haruhana.www.entity.problem;
 import jakarta.persistence.*;
 import lombok.*;
 import site.haruhana.www.entity.BaseTimeEntity;
+import site.haruhana.www.entity.problem.choice.Option;
+import site.haruhana.www.entity.problem.choice.ProblemOption;
 import site.haruhana.www.entity.problem.feedback.FeedbackType;
 import site.haruhana.www.entity.problem.feedback.ProblemFeedback;
 import site.haruhana.www.entity.problem.subjective.GradingCriteria;
