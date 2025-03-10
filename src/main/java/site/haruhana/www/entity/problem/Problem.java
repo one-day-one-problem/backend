@@ -58,17 +58,31 @@ public class Problem extends BaseTimeEntity {
     private Type type;
 
     /**
-     * (객관식) 문제의 옵션 목록 정보
-     */
-    @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProblemOption> problemOptions = new ArrayList<>();
-
-    /**
      * 문제 제공자
      */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ProblemProvider problemProvider;
+
+    /**
+     * 문제 상태 (활성/비활성/검토중 등)
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ProblemStatus status = ProblemStatus.ACTIVE;
+
+    /**
+     * 문제 피드백 목록
+     */
+    @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL)
+    @OrderBy("createdAt DESC")
+    private List<ProblemFeedback> feedbacks = new ArrayList<>();
+
+    /**
+     * (객관식) 문제의 옵션 목록 정보
+     */
+    @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProblemOption> problemOptions = new ArrayList<>();
 
     /**
      * (주관식) 문제의 채점 기준 목록
@@ -87,20 +101,6 @@ public class Problem extends BaseTimeEntity {
      */
     @Column(columnDefinition = "TEXT", nullable = true)
     private String sampleAnswer;
-
-    /**
-     * 문제 상태 (활성/비활성/검토중 등)
-     */
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ProblemStatus status = ProblemStatus.ACTIVE;
-
-    /**
-     * 문제 피드백 목록
-     */
-    @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL)
-    @OrderBy("createdAt DESC")
-    private List<ProblemFeedback> feedbacks = new ArrayList<>();
 
     @Builder(builderClassName = "MultipleChoiceProblemBuilder")
     private Problem(String title, String question, Category category, Difficulty difficulty, ProblemProvider provider) {
