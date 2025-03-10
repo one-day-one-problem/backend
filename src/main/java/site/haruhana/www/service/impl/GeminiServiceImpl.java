@@ -36,9 +36,8 @@ public class GeminiServiceImpl implements AIService {
     @Override
     public Problem generateMultipleChoiceQuestion(Category category, Difficulty difficulty) {
         try {
-            JsonNode json = getAIGeneratedContent(String.format(MULTIPLE_CHOICE_PROMPT,
-                    category.getDescription(), difficulty.name())
-            );
+            String prompt = String.format(MULTIPLE_CHOICE_PROMPT, category.getDescription(), difficulty.name());
+            JsonNode json = getAIGeneratedContent(prompt);
 
             Problem problem = Problem.multipleChoiceProblemBuilder()
                     .title(json.get("title").asText())
@@ -67,9 +66,8 @@ public class GeminiServiceImpl implements AIService {
     @Override
     public Problem generateSubjectiveQuestion(Category category, Difficulty difficulty) {
         try {
-            JsonNode json = getAIGeneratedContent(String.format(SUBJECTIVE_PROMPT,
-                    category.getDescription(), difficulty.name())
-            );
+            String prompt = String.format(SUBJECTIVE_PROMPT, category.getDescription(), difficulty.name());
+            JsonNode json = getAIGeneratedContent(prompt);
 
             Problem problem = Problem.subjectiveProblemBuilder()
                     .title(json.get("title").asText())
