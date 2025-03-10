@@ -6,7 +6,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.haruhana.www.entity.problem.Category;
-import site.haruhana.www.entity.problem.Difficulty;
+import site.haruhana.www.entity.problem.ProblemDifficulty;
 import site.haruhana.www.entity.problem.Problem;
 import site.haruhana.www.repository.ProblemRepository;
 
@@ -33,7 +33,7 @@ public class ProblemService {
      * 문제 생성 시 다음 요소들을 랜덤하게 선택합니다:
      * <ul>
      *   <li>카테고리: {@link Category} 중 랜덤 선택</li>
-     *   <li>난이도: {@link Difficulty} 중 랜덤 선택</li>
+     *   <li>난이도: {@link ProblemDifficulty} 중 랜덤 선택</li>
      *   <li>문제 유형: 객관식/주관식 랜덤 선택</li>
      * </ul>
      */
@@ -43,7 +43,7 @@ public class ProblemService {
         try {
             // 랜덤 카테고리, 난이도, 문제 유형 선택
             Category randomCategory = getRandomCategory();
-            Difficulty randomDifficulty = getRandomDifficulty();
+            ProblemDifficulty randomDifficulty = getRandomDifficulty();
             boolean isMultipleChoice = random.nextBoolean();
 
             // 문제 생성
@@ -74,10 +74,10 @@ public class ProblemService {
     /**
      * 랜덤한 문제 난이도를 선택하는 메소드
      *
-     * @return 무작위로 선택된 {@link Difficulty}
+     * @return 무작위로 선택된 {@link ProblemDifficulty}
      */
-    private Difficulty getRandomDifficulty() {
-        Difficulty[] difficulties = Difficulty.values();
+    private ProblemDifficulty getRandomDifficulty() {
+        ProblemDifficulty[] difficulties = ProblemDifficulty.values();
         return difficulties[random.nextInt(difficulties.length)];
     }
 }

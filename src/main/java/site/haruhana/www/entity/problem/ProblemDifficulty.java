@@ -1,5 +1,5 @@
 package site.haruhana.www.entity.problem;
 
-public enum Difficulty {
+public enum ProblemDifficulty {
     EASY, MEDIUM, HARD
 }
