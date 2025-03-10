@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import site.haruhana.www.entity.problem.Category;
+import site.haruhana.www.entity.problem.ProblemCategory;
 import site.haruhana.www.entity.problem.ProblemDifficulty;
 import site.haruhana.www.entity.problem.Problem;
 import site.haruhana.www.repository.ProblemRepository;
@@ -32,7 +32,7 @@ public class ProblemService {
      * </ul>
      * 문제 생성 시 다음 요소들을 랜덤하게 선택합니다:
      * <ul>
-     *   <li>카테고리: {@link Category} 중 랜덤 선택</li>
+     *   <li>카테고리: {@link ProblemCategory} 중 랜덤 선택</li>
      *   <li>난이도: {@link ProblemDifficulty} 중 랜덤 선택</li>
      *   <li>문제 유형: 객관식/주관식 랜덤 선택</li>
      * </ul>
@@ -42,7 +42,7 @@ public class ProblemService {
     public void generateRandomProblem() {
         try {
             // 랜덤 카테고리, 난이도, 문제 유형 선택
-            Category randomCategory = getRandomCategory();
+            ProblemCategory randomCategory = getRandomCategory();
             ProblemDifficulty randomDifficulty = getRandomDifficulty();
             boolean isMultipleChoice = random.nextBoolean();
 
@@ -64,10 +64,10 @@ public class ProblemService {
     /**
      * 랜덤한 문제 카테고리를 선택하는 메소드
      *
-     * @return 무작위로 선택된 {@link Category}
+     * @return 무작위로 선택된 {@link ProblemCategory}
      */
-    private Category getRandomCategory() {
-        Category[] categories = Category.values();
+    private ProblemCategory getRandomCategory() {
+        ProblemCategory[] categories = ProblemCategory.values();
         return categories[random.nextInt(categories.length)];
     }
 

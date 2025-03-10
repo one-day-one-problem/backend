@@ -43,7 +43,7 @@ public class Problem extends BaseTimeEntity {
      */
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Category category;
+    private ProblemCategory category;
 
     /**
      * 문제 난이도
@@ -105,7 +105,7 @@ public class Problem extends BaseTimeEntity {
     private String sampleAnswer;
 
     @Builder(builderClassName = "MultipleChoiceProblemBuilder")
-    private Problem(String title, String question, Category category, ProblemDifficulty difficulty, ProblemProvider provider) {
+    private Problem(String title, String question, ProblemCategory category, ProblemDifficulty difficulty, ProblemProvider provider) {
         this.title = title;
         this.question = question;
         this.category = category;
@@ -117,7 +117,7 @@ public class Problem extends BaseTimeEntity {
     }
 
     @Builder(builderClassName = "SubjectiveProblemBuilder")
-    private Problem(String title, String question, Category category, ProblemDifficulty difficulty, ProblemProvider provider, String expectedAnswerLength, String sampleAnswer) {
+    private Problem(String title, String question, ProblemCategory category, ProblemDifficulty difficulty, ProblemProvider provider, String expectedAnswerLength, String sampleAnswer) {
         this.title = title;
         this.question = question;
         this.category = category;

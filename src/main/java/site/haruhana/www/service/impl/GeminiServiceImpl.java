@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import site.haruhana.www.entity.problem.Category;
+import site.haruhana.www.entity.problem.ProblemCategory;
 import site.haruhana.www.entity.problem.ProblemDifficulty;
 import site.haruhana.www.entity.problem.Problem;
 import site.haruhana.www.entity.problem.ProblemProvider;
@@ -34,7 +34,7 @@ public class GeminiServiceImpl implements AIService {
     private final ObjectMapper objectMapper;
 
     @Override
-    public Problem generateMultipleChoiceQuestion(Category category, ProblemDifficulty difficulty) {
+    public Problem generateMultipleChoiceQuestion(ProblemCategory category, ProblemDifficulty difficulty) {
         try {
             String prompt = String.format(MULTIPLE_CHOICE_PROMPT, category.getDescription(), difficulty.name());
             JsonNode json = getAIGeneratedContent(prompt);
@@ -64,7 +64,7 @@ public class GeminiServiceImpl implements AIService {
     }
 
     @Override
-    public Problem generateSubjectiveQuestion(Category category, ProblemDifficulty difficulty) {
+    public Problem generateSubjectiveQuestion(ProblemCategory category, ProblemDifficulty difficulty) {
         try {
             String prompt = String.format(SUBJECTIVE_PROMPT, category.getDescription(), difficulty.name());
             JsonNode json = getAIGeneratedContent(prompt);
