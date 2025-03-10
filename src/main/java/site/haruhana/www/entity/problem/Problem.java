@@ -57,7 +57,7 @@ public class Problem extends BaseTimeEntity {
      */
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Type type;
+    private ProblemType type;
 
     /**
      * 문제 제공자
@@ -110,7 +110,7 @@ public class Problem extends BaseTimeEntity {
         this.question = question;
         this.category = category;
         this.difficulty = difficulty;
-        this.type = Type.MULTIPLE_CHOICE;
+        this.type = ProblemType.MULTIPLE_CHOICE;
         this.problemProvider = provider;
         this.status = ProblemStatus.ACTIVE;
         this.problemOptions = new ArrayList<>();
@@ -122,7 +122,7 @@ public class Problem extends BaseTimeEntity {
         this.question = question;
         this.category = category;
         this.difficulty = difficulty;
-        this.type = Type.SUBJECTIVE;
+        this.type = ProblemType.SUBJECTIVE;
         this.problemProvider = provider;
         this.expectedAnswerLength = expectedAnswerLength;
         this.sampleAnswer = sampleAnswer;
@@ -146,7 +146,7 @@ public class Problem extends BaseTimeEntity {
      * @throws IllegalStateException 주관식 문제에 옵션을 추가하려 할 때
      */
     public void addOption(String optionContent, boolean isCorrect) {
-        if (this.type != Type.MULTIPLE_CHOICE) {
+        if (this.type != ProblemType.MULTIPLE_CHOICE) {
             throw new IllegalStateException("Cannot add options to non-multiple choice problems");
         }
 
@@ -170,7 +170,7 @@ public class Problem extends BaseTimeEntity {
      * @throws IllegalStateException 객관식 문제에 채점 기준을 추가하려 할 때
      */
     public void addGradingCriteria(String content) {
-        if (this.type != Type.SUBJECTIVE) {
+        if (this.type != ProblemType.SUBJECTIVE) {
             throw new IllegalStateException("Cannot add grading criteria to non-subjective problems");
         }
 
