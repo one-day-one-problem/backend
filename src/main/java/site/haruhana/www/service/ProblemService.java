@@ -42,17 +42,18 @@ public class ProblemService {
             // 랜덤 카테고리, 난이도, 문제 유형 선택
             var randomCategory = RandomUtil.getRandomCategory();
             var randomDifficulty = RandomUtil.getRandomDifficulty();
-            var isMultipleChoice = RandomUtil.getRandomBoolean();
+            var problemType = RandomUtil.getRandomProblemType();
 
             // 문제 생성
-            Problem problem = isMultipleChoice ?
-                    aiService.generateMultipleChoiceQuestion(randomCategory, randomDifficulty) :
-                    aiService.generateSubjectiveQuestion(randomCategory, randomDifficulty);
+            Problem problem = switch (problemType) {
+                case MULTIPLE_CHOICE -> aiService.generateMultipleChoiceQuestion(randomCategory, randomDifficulty);
+                case SUBJECTIVE -> aiService.generateSubjectiveQuestion(randomCategory, randomDifficulty);
+            };
 
             // 문제 저장
             problemRepository.save(problem);
 
-            log.info("새로운 문제가 생성되었습니다. 유형: {}, 카테고리: {}, 난이도: {}", isMultipleChoice ? "객관식" : "주관식", randomCategory, randomDifficulty);
+            log.info("새로운 문제가 생성되었습니다. 유형: {}, 카테고리: {}, 난이도: {}", problemType, randomCategory, randomDifficulty);
 
         } catch (Exception e) {
             log.error("문제 자동 생성 중 오류 발생: {}", e.getMessage());

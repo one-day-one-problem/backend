@@ -2,6 +2,7 @@ package site.haruhana.www.utils;
 
 import site.haruhana.www.entity.problem.ProblemCategory;
 import site.haruhana.www.entity.problem.ProblemDifficulty;
+import site.haruhana.www.entity.problem.ProblemType;
 
 import java.util.Random;
 
@@ -37,11 +38,12 @@ public final class RandomUtil {
     }
 
     /**
-     * 랜덤으로 boolean 값을 반환하는 메소드
+     * 랜덤으로 문제 유형을 반환하는 메소드
      *
-     * @return 랜덤 boolean 값
+     * @return 랜덤 문제 유형
      */
-    public static boolean getRandomBoolean() {
-        return RANDOM.nextBoolean();
+    public static ProblemType getRandomProblemType() {
+        ProblemType[] types = ProblemType.values();
+        return types[RANDOM.nextInt(types.length)];
     }
 }
