@@ -19,7 +19,6 @@ public class ProblemService {
     // 의존성 주입
     private final AIService aiService;
     private final ProblemRepository problemRepository;
-    private final RandomUtil randomUtil;
 
     /**
      * 60초마다 실행되는 문제 자동 생성 스케줄러
@@ -41,9 +40,9 @@ public class ProblemService {
     public void generateRandomProblem() {
         try {
             // 랜덤 카테고리, 난이도, 문제 유형 선택
-            var randomCategory = randomUtil.getRandomCategory();
-            var randomDifficulty = randomUtil.getRandomDifficulty();
-            var isMultipleChoice = randomUtil.getRandomBoolean();
+            var randomCategory = RandomUtil.getRandomCategory();
+            var randomDifficulty = RandomUtil.getRandomDifficulty();
+            var isMultipleChoice = RandomUtil.getRandomBoolean();
 
             // 문제 생성
             Problem problem = isMultipleChoice ?

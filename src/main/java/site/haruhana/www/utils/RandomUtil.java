@@ -1,24 +1,29 @@
 package site.haruhana.www.utils;
 
-import org.springframework.stereotype.Component;
 import site.haruhana.www.entity.problem.ProblemCategory;
 import site.haruhana.www.entity.problem.ProblemDifficulty;
 
 import java.util.Random;
 
-@Component
-public class RandomUtil {
+public final class RandomUtil {
 
-    private final Random random = new Random();
+    private static final Random RANDOM = new Random();
+
+    /**
+     * 인스턴스 생성 방지용 private 생성자
+     */
+    private RandomUtil() {
+
+    }
 
     /**
      * 랜덤으로 카테고리를 반환하는 메소드
      *
      * @return 랜덤 카테고리
      */
-    public ProblemCategory getRandomCategory() {
+    public static ProblemCategory getRandomCategory() {
         ProblemCategory[] categories = ProblemCategory.values();
-        return categories[random.nextInt(categories.length)];
+        return categories[RANDOM.nextInt(categories.length)];
     }
 
     /**
@@ -26,9 +31,9 @@ public class RandomUtil {
      *
      * @return 랜덤 난이도
      */
-    public ProblemDifficulty getRandomDifficulty() {
+    public static ProblemDifficulty getRandomDifficulty() {
         ProblemDifficulty[] difficulties = ProblemDifficulty.values();
-        return difficulties[random.nextInt(difficulties.length)];
+        return difficulties[RANDOM.nextInt(difficulties.length)];
     }
 
     /**
@@ -36,7 +41,7 @@ public class RandomUtil {
      *
      * @return 랜덤 boolean 값
      */
-    public boolean getRandomBoolean() {
-        return random.nextBoolean();
+    public static boolean getRandomBoolean() {
+        return RANDOM.nextBoolean();
     }
 }
