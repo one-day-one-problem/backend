@@ -29,10 +29,10 @@ public class ProblemOption {
     private Problem problem;
 
     /**
-     * 옵션
+     * 옵션 내용
      */
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Option option;
+    @Column(columnDefinition = "TEXT")
+    private String content;
 
     /**
      * 해당 옵션이 문제의 정답인지 여부
