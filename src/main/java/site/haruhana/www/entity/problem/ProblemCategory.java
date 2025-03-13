@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum Category {
+public enum ProblemCategory {
     // Todo: 현재 카테고리는 임시 데이터로, 추후 수정이 필요함.
 
     // Operating System

@@ -1,4 +1,4 @@
-package site.haruhana.www.entity.problem;
+package site.haruhana.www.entity.problem.choice;
 
 import jakarta.persistence.*;
 import lombok.*;
