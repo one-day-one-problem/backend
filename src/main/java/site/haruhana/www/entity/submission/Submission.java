@@ -63,6 +63,12 @@ public class Submission {
     private Boolean isCorrect;
 
     /**
+     * (주관식) 사용자가 제출한 답안에 대한 점수
+     */
+    @Column(nullable = true)
+    private Integer score;
+
+    /**
      * (주관식) 사용자가 제출한 답안에 대한 피드백 (by AI)
      */
     @Column(columnDefinition = "TEXT")
