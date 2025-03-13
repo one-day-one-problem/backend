@@ -3,7 +3,6 @@ package site.haruhana.www.entity.problem;
 import jakarta.persistence.*;
 import lombok.*;
 import site.haruhana.www.entity.BaseTimeEntity;
-import site.haruhana.www.entity.problem.choice.Option;
 import site.haruhana.www.entity.problem.choice.ProblemOption;
 import site.haruhana.www.entity.problem.feedback.FeedbackType;
 import site.haruhana.www.entity.problem.feedback.ProblemFeedback;
@@ -150,14 +149,10 @@ public class Problem extends BaseTimeEntity {
             throw new IllegalStateException("Cannot add options to non-multiple choice problems");
         }
 
-        Option option = Option.builder()
-                .content(optionContent)
-                .build();
-
         this.problemOptions.add(
                 ProblemOption.builder()
                         .problem(this)
-                        .option(option)
+                        .content(optionContent)
                         .isCorrect(isCorrect)
                         .build()
         );
