@@ -1,4 +1,4 @@
-package site.haruhana.www.entity.attempt;
+package site.haruhana.www.entity.submission;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "attempts")
-public class Attempt {
+public class Submission {
 
     /**
      * 시도 ID
