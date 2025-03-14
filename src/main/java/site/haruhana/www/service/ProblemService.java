@@ -19,16 +19,10 @@ public class ProblemService {
     // 의존성 주입
     private final AIService aiService;
     private final ProblemRepository problemRepository;
-    private final RandomUtil randomUtil;
 
     /**
      * 60초마다 실행되는 문제 자동 생성 스케줄러
      * <p>
-     * 다음 조건을 만족할 때 문제를 생성합니다:
-     * <ul>
-     *   <li>총 문제 수가 1000개 미만인 경우</li>
-     *   <li>또는 (총 문제 수 * 0.8) < 최다 풀이자의 풀이 수인 경우</li>
-     * </ul>
      * 문제 생성 시 다음 요소들을 랜덤하게 선택합니다:
      * <ul>
      *   <li>카테고리: {@link ProblemCategory} 중 랜덤 선택</li>
@@ -41,19 +35,20 @@ public class ProblemService {
     public void generateRandomProblem() {
         try {
             // 랜덤 카테고리, 난이도, 문제 유형 선택
-            var randomCategory = randomUtil.getRandomCategory();
-            var randomDifficulty = randomUtil.getRandomDifficulty();
-            var isMultipleChoice = randomUtil.getRandomBoolean();
+            var randomCategory = RandomUtil.getRandomCategory();
+            var randomDifficulty = RandomUtil.getRandomDifficulty();
+            var problemType = RandomUtil.getRandomProblemType();
 
             // 문제 생성
-            Problem problem = isMultipleChoice ?
-                    aiService.generateMultipleChoiceQuestion(randomCategory, randomDifficulty) :
-                    aiService.generateSubjectiveQuestion(randomCategory, randomDifficulty);
+            Problem problem = switch (problemType) {
+                case MULTIPLE_CHOICE -> aiService.generateMultipleChoiceQuestion(randomCategory, randomDifficulty);
+                case SUBJECTIVE -> aiService.generateSubjectiveQuestion(randomCategory, randomDifficulty);
+            };
 
             // 문제 저장
             problemRepository.save(problem);
 
-            log.info("새로운 문제가 생성되었습니다. 유형: {}, 카테고리: {}, 난이도: {}", isMultipleChoice ? "객관식" : "주관식", randomCategory, randomDifficulty);
+            log.info("새로운 문제가 생성되었습니다. 유형: {}, 카테고리: {}, 난이도: {}", problemType.getDescription(), randomCategory, randomDifficulty);
 
         } catch (Exception e) {
             log.error("문제 자동 생성 중 오류 발생: {}", e.getMessage());
