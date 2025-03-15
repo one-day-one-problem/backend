@@ -73,6 +73,12 @@ public class Problem extends BaseTimeEntity {
     private ProblemStatus status = ProblemStatus.ACTIVE;
 
     /**
+     * 해당 문제를 푼 사용자 수
+     */
+    @Column(nullable = false)
+    private long solvedCount = 0;
+
+    /**
      * 문제 피드백 목록
      */
     @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL)
@@ -112,6 +118,8 @@ public class Problem extends BaseTimeEntity {
         this.type = ProblemType.MULTIPLE_CHOICE;
         this.problemProvider = provider;
         this.status = ProblemStatus.ACTIVE;
+        this.solvedCount = 0;
+        this.feedbacks = new ArrayList<>();
         this.problemOptions = new ArrayList<>();
     }
 
@@ -123,10 +131,12 @@ public class Problem extends BaseTimeEntity {
         this.difficulty = difficulty;
         this.type = ProblemType.SUBJECTIVE;
         this.problemProvider = provider;
+        this.status = ProblemStatus.ACTIVE;
+        this.solvedCount = 0;
+        this.feedbacks = new ArrayList<>();
+        this.gradingCriteria = new ArrayList<>();
         this.expectedAnswerLength = expectedAnswerLength;
         this.sampleAnswer = sampleAnswer;
-        this.status = ProblemStatus.ACTIVE;
-        this.gradingCriteria = new ArrayList<>();
     }
 
     public static SubjectiveProblemBuilder subjectiveProblemBuilder() {
