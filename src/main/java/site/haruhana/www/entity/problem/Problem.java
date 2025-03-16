@@ -1,7 +1,10 @@
 package site.haruhana.www.entity.problem;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import site.haruhana.www.entity.BaseTimeEntity;
 import site.haruhana.www.entity.problem.choice.ProblemOption;
 import site.haruhana.www.entity.problem.feedback.FeedbackType;
