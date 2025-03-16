@@ -9,11 +9,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.haruhana.www.dto.problem.ProblemSortType;
 import site.haruhana.www.dto.problem.ProblemSummaryDto;
+import site.haruhana.www.dto.problem.ProblemDto;
 import site.haruhana.www.entity.problem.ProblemCategory;
 import site.haruhana.www.entity.problem.ProblemDifficulty;
 import site.haruhana.www.entity.problem.Problem;
 import site.haruhana.www.repository.ProblemRepository;
 import site.haruhana.www.utils.RandomUtil;
+import site.haruhana.www.exception.ProblemNotFoundException;
 
 @Slf4j
 @Service
@@ -77,4 +79,19 @@ public class ProblemService {
                 difficulty
         );
     }
+
+    /**
+     * 특정 문제를 조회하는 메서드
+     *
+     * @param problemId 조회하고자 하는 문제의 ID
+     * @return {@link ProblemDto} 문제 상세 정보
+     */
+    @Transactional(readOnly = true)
+    public ProblemDto getProblem(Long problemId) {
+        Problem problem = problemRepository.findById(problemId)
+                .orElseThrow(ProblemNotFoundException::new);
+
+        return ProblemDto.from(problem);
+    }
+
 }

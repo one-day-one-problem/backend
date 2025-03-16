@@ -4,11 +4,9 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import site.haruhana.www.base.BaseResponse;
+import site.haruhana.www.dto.problem.ProblemDto;
 import site.haruhana.www.dto.problem.ProblemPage;
 import site.haruhana.www.dto.problem.ProblemSortType;
 import site.haruhana.www.dto.problem.ProblemSummaryDto;
@@ -42,5 +40,11 @@ public class ProblemController {
     ) {
         Page<ProblemSummaryDto> problems = problemService.getProblems(page, size, category, difficulty, sortType);
         return ResponseEntity.ok(BaseResponse.onSuccess("문제 목록을 조회하는데 성공했습니다.", new ProblemPage<>(problems)));
+    }
+
+    @GetMapping("/{problemId}")
+    public ResponseEntity<BaseResponse<ProblemDto>> getProblem(@PathVariable Long problemId) {
+        ProblemDto problem = problemService.getProblem(problemId);
+        return ResponseEntity.ok(BaseResponse.onSuccess("문제를 조회하는데 성공했습니다.", problem));
     }
 }
