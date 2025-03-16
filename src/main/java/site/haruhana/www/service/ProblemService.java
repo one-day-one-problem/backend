@@ -7,23 +7,23 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.haruhana.www.dto.problem.ProblemDto;
 import site.haruhana.www.dto.problem.ProblemSortType;
 import site.haruhana.www.dto.problem.ProblemSummaryDto;
-import site.haruhana.www.dto.problem.ProblemDto;
+import site.haruhana.www.entity.problem.Problem;
 import site.haruhana.www.entity.problem.ProblemCategory;
 import site.haruhana.www.entity.problem.ProblemDifficulty;
-import site.haruhana.www.entity.problem.Problem;
+import site.haruhana.www.exception.ProblemNotFoundException;
 import site.haruhana.www.repository.ProblemRepository;
 import site.haruhana.www.utils.RandomUtil;
-import site.haruhana.www.exception.ProblemNotFoundException;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProblemService {
 
-    // 의존성 주입
     private final AIService aiService;
+
     private final ProblemRepository problemRepository;
 
     /**

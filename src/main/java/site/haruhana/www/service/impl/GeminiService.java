@@ -8,9 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import site.haruhana.www.entity.problem.Problem;
 import site.haruhana.www.entity.problem.ProblemCategory;
 import site.haruhana.www.entity.problem.ProblemDifficulty;
-import site.haruhana.www.entity.problem.Problem;
 import site.haruhana.www.entity.problem.ProblemProvider;
 import site.haruhana.www.feign.GeminiFeignClient;
 import site.haruhana.www.feign.dto.gemini.GeminiRequest;
@@ -24,7 +24,7 @@ import site.haruhana.www.service.AIService;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class GeminiServiceImpl implements AIService {
+public class GeminiService implements AIService {
 
     @Value("${gemini.api.key}")
     private String apiKey;

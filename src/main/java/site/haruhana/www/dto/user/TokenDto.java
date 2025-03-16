@@ -1,4 +1,4 @@
-package site.haruhana.www.dto;
+package site.haruhana.www.dto.user;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
