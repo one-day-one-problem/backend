@@ -12,12 +12,17 @@ import site.haruhana.www.entity.problem.Problem;
 import site.haruhana.www.entity.problem.ProblemCategory;
 import site.haruhana.www.entity.problem.ProblemDifficulty;
 import site.haruhana.www.entity.problem.ProblemProvider;
+import site.haruhana.www.entity.submission.Submission;
 import site.haruhana.www.feign.GeminiFeignClient;
 import site.haruhana.www.feign.dto.gemini.GeminiRequest;
 import site.haruhana.www.service.AIService;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 /**
- * Google Gemini AI를 사용하여 프로그래밍 문제를 자동 생성하는 서비스
+ * Google Gemini AI를 사용하여 문제 생성 및 채점을 수행하는 서비스 클래스
  *
  * @see <a href="https://ai.google.dev/gemini-api/docs?hl=ko">Gemini API 문서</a>
  */
@@ -92,6 +97,73 @@ public class GeminiService implements AIService {
         } catch (Exception e) {
             log.error("주관식 문제 생성 중 오류 발생: {}", e.getMessage());
             throw new RuntimeException("AI를 통한 주관식 문제 생성에 실패했습니다", e);
+        }
+    }
+
+    @Override
+    public GradingResult gradeSubjectiveSubmission(Submission submission) {
+        try {
+            Problem problem = submission.getProblem();
+            String userAnswer = submission.getSubmittedAnswer();
+            List<String> gradingCriteria = problem.getGradingCriteriaList();
+
+            // 채점 기준 목록을 번호가 있는 목록 형태로 변환
+            String formattedCriteria = IntStream.range(0, gradingCriteria.size())
+                    .mapToObj(i -> (i + 1) + ". " + gradingCriteria.get(i))
+                    .collect(Collectors.joining("\n"));
+
+            // 프롬프트 생성
+            String gradingPrompt = String.format(
+                    SUBJECTIVE_GRADING_PROMPT,
+                    problem.getTitle(),
+                    problem.getQuestion(),
+                    formattedCriteria,
+                    problem.getSampleAnswer(),
+                    userAnswer
+            );
+
+            // AI에 채점 요청
+            JsonNode json = getAIGeneratedContent(gradingPrompt);
+
+            // 채점 결과 파싱
+            int totalScore = json.get("score").asInt();
+            String overallFeedback = json.get("feedback").asText();
+            JsonNode criteriaEvaluations = json.get("criteriaEvaluation");
+
+            // 피드백 포맷팅
+            StringBuilder feedbackBuilder = new StringBuilder();
+
+            // 종합적인 평가 추가
+            feedbackBuilder.append("# 종합 평가 결과 (").append(totalScore).append("점)\n\n");
+            feedbackBuilder.append(overallFeedback).append("\n\n");
+
+            // 각 채점 기준별 평가 추가
+            feedbackBuilder.append("# 평가 기준별 상세 분석\n\n");
+            if (criteriaEvaluations != null && criteriaEvaluations.isArray()) {
+                for (int i = 0; i < criteriaEvaluations.size(); i++) {
+                    // i번째 채점 기준 평가 정보
+                    JsonNode evaluation = criteriaEvaluations.get(i);
+
+                    // 평가 정보 파싱
+                    String criteriaName = evaluation.get("criteria").asText();
+                    int criteriaScore = evaluation.get("score").asInt();
+                    String criteriaFeedback = evaluation.get("feedback").asText();
+
+                    feedbackBuilder.append("## ").append(i + 1).append(". ")
+                            .append(criteriaName)
+                            .append(" (").append(criteriaScore).append("점)\n\n")
+                            .append(criteriaFeedback).append("\n\n");
+                }
+            }
+
+            log.info("제출 #{} 채점 완료: {}점", submission.getId(), totalScore);
+
+            // 결과 반환
+            return new GradingResult(totalScore, feedbackBuilder.toString().trim());
+
+        } catch (Exception e) {
+            log.error("제출 #{} 채점 중 오류 발생: {}", submission.getId(), e.getMessage());
+            throw new RuntimeException("AI를 통한 주관식 문제 채점에 실패했습니다", e);
         }
     }
 
