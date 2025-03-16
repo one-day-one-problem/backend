@@ -22,9 +22,11 @@ public class ProblemFeedback extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private Problem problem;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private User reporter;
 
     @Column(columnDefinition = "TEXT", nullable = false)

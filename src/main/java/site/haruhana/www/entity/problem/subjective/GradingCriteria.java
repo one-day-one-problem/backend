@@ -20,6 +20,7 @@ public class GradingCriteria {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private Problem problem;
 
     /**
