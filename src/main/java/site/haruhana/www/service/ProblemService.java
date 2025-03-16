@@ -22,8 +22,8 @@ import site.haruhana.www.exception.ProblemNotFoundException;
 @RequiredArgsConstructor
 public class ProblemService {
 
-    // 의존성 주입
     private final AIService aiService;
+
     private final ProblemRepository problemRepository;
 
     /**
