@@ -24,7 +24,7 @@ import site.haruhana.www.service.AIService;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class GeminiServiceImpl implements AIService {
+public class GeminiService implements AIService {
 
     @Value("${gemini.api.key}")
     private String apiKey;
