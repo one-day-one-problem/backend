@@ -223,4 +223,11 @@ public class Problem extends BaseTimeEntity {
         this.feedbacks.add(feedback);
     }
 
+    /**
+     * 문제 풀이 수를 증가하는 메서드
+     */
+    public void incrementSolvedCount() {
+        this.solvedCount++;
+    }
+
 }
