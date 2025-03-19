@@ -83,4 +83,25 @@ public class Submission {
     @Column(nullable = true)
     private LocalDateTime feedbackProvidedAt;
 
+    /**
+     * 주관식 문제의 채점 결과를 업데이트하는 메서드
+     *
+     * @param score    점수
+     * @param feedback 피드백
+     */
+    public void updateGradingResult(int score, String feedback) {
+        this.score = score;
+        this.feedback = feedback;
+        this.feedbackProvidedAt = LocalDateTime.now();
+    }
+
+    /**
+     * 객관식 문제의 정답 여부를 설정하는 메서드
+     *
+     * @param isCorrect 정답 여부
+     */
+    public void updateCorrectness(boolean isCorrect) {
+        this.isCorrect = isCorrect;
+    }
+
 }
