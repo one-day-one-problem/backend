@@ -3,8 +3,8 @@ package site.haruhana.www.feign.dto.gemini;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
 
 @Data
 @Builder

@@ -1,7 +1,10 @@
 package site.haruhana.www.entity.problem;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import site.haruhana.www.entity.BaseTimeEntity;
 import site.haruhana.www.entity.problem.choice.ProblemOption;
 import site.haruhana.www.entity.problem.feedback.FeedbackType;
@@ -169,6 +172,21 @@ public class Problem extends BaseTimeEntity {
     }
 
     /**
+     * 주관식 문제의 채점 기준 목록을 반환하는 메서드
+     *
+     * @return 주관식 문제의 채점 기준 목록
+     */
+    public List<String> getGradingCriteriaList() {
+        if (this.type != ProblemType.SUBJECTIVE) {
+            throw new IllegalStateException("Cannot get grading criteria from non-subjective problems");
+        }
+
+        return gradingCriteria.stream()
+                .map(GradingCriteria::getContent)
+                .toList();
+    }
+
+    /**
      * 주관식 문제에 채점 기준을 추가하는 연관관계 편의 메서드
      *
      * @param content 채점 기준 내용
@@ -203,6 +221,13 @@ public class Problem extends BaseTimeEntity {
                 .build();
 
         this.feedbacks.add(feedback);
+    }
+
+    /**
+     * 문제 풀이 수를 증가하는 메서드
+     */
+    public void incrementSolvedCount() {
+        this.solvedCount++;
     }
 
 }

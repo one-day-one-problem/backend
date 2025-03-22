@@ -1,4 +1,4 @@
-package site.haruhana.www.base;
+package site.haruhana.www.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;

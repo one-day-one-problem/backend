@@ -8,8 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import site.haruhana.www.base.BaseResponse;
-import site.haruhana.www.dto.TokenDto;
+import site.haruhana.www.dto.BaseResponse;
+import site.haruhana.www.dto.user.TokenDto;
 import site.haruhana.www.oauth.CustomOAuth2User;
 import site.haruhana.www.utils.JwtUtil;
 
