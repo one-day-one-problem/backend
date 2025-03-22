@@ -3,6 +3,7 @@ package site.haruhana.www.service;
 import site.haruhana.www.entity.problem.Problem;
 import site.haruhana.www.entity.problem.ProblemCategory;
 import site.haruhana.www.entity.problem.ProblemDifficulty;
+import site.haruhana.www.queue.wrapper.GradingData;
 
 public interface AIService {
 
@@ -139,6 +140,51 @@ public interface AIService {
             4. 난이도에 맞는 적절한 복잡도 유지
             """;
 
+    String SUBJECTIVE_GRADING_PROMPT = """
+            당신은 프로그래밍 주관식 문제 채점 전문가입니다. 다음 문제와 제출된 답안을 분석하여 채점하세요.
+            
+            [문제 제목]
+            %s
+            
+            [문제 내용]
+            %s
+            
+            [채점 기준]
+            %s
+            
+            [예시 답안]
+            %s
+            
+            [제출된 답안]
+            %s
+            
+            위 정보를 바탕으로 다음 JSON 형식으로 채점 결과를 제공해주세요:
+            {
+                "score": 0~100 사이의 점수(정수),
+                "feedback": "전체적인 피드백",
+                "criteriaEvaluation": [
+                    {
+                        "criteria": "채점 기준 1",
+                        "score": 0~100 사이의 점수(정수),
+                        "feedback": "해당 기준에 대한 구체적인 피드백"
+                    },
+                    // ... 나머지 채점 기준에 대한 평가
+                ]
+            }
+            
+            점수 부여 지침:
+            1. 각 채점 기준은 동일한 비중으로 전체 점수에 기여합니다.
+            2. 100점은 모든 기준을 완벽하게 충족했을 때만 부여합니다.
+            3. 0점은 답안이 전혀 관련이 없거나 문제를 이해하지 못했을 때 부여합니다.
+            4. 부분 점수는 각 기준별 충족도에 따라 부여합니다.
+            
+            피드백 작성 지침:
+            1. 구체적이고 건설적인 피드백을 제공합니다.
+            2. 잘한 점과 개선할 점을 균형있게 언급합니다.
+            3. 가능하면 예시나 참고 자료를 제안합니다.
+            4. 기술적으로 정확하고 교육적인 내용으로 작성합니다.
+            """;
+
     /**
      * AI를 사용하여 객관식 문제를 생성하는 메소드
      *
@@ -157,4 +203,18 @@ public interface AIService {
      */
     Problem generateSubjectiveQuestion(ProblemCategory category, ProblemDifficulty difficulty);
 
+    /**
+     * 사용자의 주관식 답안을 채점하는 메소드
+     *
+     * @param data 채점 데이터
+     * @return 채점 결과 (점수와 피드백)
+     */
+    GradingResult gradeSubjectiveSubmission(GradingData data);
+
+    /**
+     * 주관식 채점 결과를 담는 레코드
+     */
+    record GradingResult(int score, String feedback) {
+
+    }
 }
