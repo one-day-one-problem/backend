@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import site.haruhana.www.base.BaseResponse;
+import site.haruhana.www.dto.BaseResponse;
 import site.haruhana.www.exception.ProblemNotFoundException;
 
 @RestControllerAdvice

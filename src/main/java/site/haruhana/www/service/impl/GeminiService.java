@@ -14,7 +14,7 @@ import site.haruhana.www.entity.problem.ProblemDifficulty;
 import site.haruhana.www.entity.problem.ProblemProvider;
 import site.haruhana.www.feign.GeminiFeignClient;
 import site.haruhana.www.feign.dto.gemini.GeminiRequest;
-import site.haruhana.www.queue.wrapper.GradingData;
+import site.haruhana.www.queue.message.GradingData;
 import site.haruhana.www.service.AIService;
 
 import java.util.stream.Collectors;

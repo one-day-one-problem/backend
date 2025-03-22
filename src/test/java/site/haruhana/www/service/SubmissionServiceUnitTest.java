@@ -21,7 +21,7 @@ import site.haruhana.www.entity.user.Role;
 import site.haruhana.www.entity.user.User;
 import site.haruhana.www.exception.ProblemNotFoundException;
 import site.haruhana.www.queue.SubmissionMessageQueue;
-import site.haruhana.www.queue.wrapper.GradingData;
+import site.haruhana.www.queue.message.GradingData;
 import site.haruhana.www.repository.ProblemRepository;
 import site.haruhana.www.repository.SubmissionRepository;
 

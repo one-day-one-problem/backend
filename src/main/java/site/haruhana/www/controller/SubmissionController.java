@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import site.haruhana.www.base.BaseResponse;
+import site.haruhana.www.dto.BaseResponse;
 import site.haruhana.www.dto.submission.request.SubmissionRequestDto;
 import site.haruhana.www.dto.submission.response.SubmissionResponseDto;
 import site.haruhana.www.entity.user.User;

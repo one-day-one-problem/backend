@@ -1,6 +1,6 @@
 package site.haruhana.www.queue;
 
-import site.haruhana.www.queue.wrapper.GradingData;
+import site.haruhana.www.queue.message.GradingData;
 
 /**
  * 주관식 답안 채점을 위한 메시지 큐 인터페이스
