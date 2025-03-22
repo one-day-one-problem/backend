@@ -2,7 +2,6 @@ package site.haruhana.www.controller;
 
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import site.haruhana.www.dto.BaseResponse;
@@ -38,8 +37,8 @@ public class ProblemController {
             @RequestParam(required = false) ProblemDifficulty difficulty,
             @RequestParam(defaultValue = "MOST_SOLVED") ProblemSortType sortType
     ) {
-        Page<ProblemSummaryDto> problems = problemService.getProblems(page, size, category, difficulty, sortType);
-        return ResponseEntity.ok(BaseResponse.onSuccess("문제 목록을 조회하는데 성공했습니다.", new ProblemPage<>(problems)));
+        ProblemPage<ProblemSummaryDto> data = problemService.getProblems(page, size, category, difficulty, sortType);
+        return ResponseEntity.ok(BaseResponse.onSuccess("문제 목록을 조회하는데 성공했습니다.", data));
     }
 
     @GetMapping("/{problemId}")

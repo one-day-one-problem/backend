@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.haruhana.www.dto.problem.ProblemDto;
+import site.haruhana.www.dto.problem.ProblemPage;
 import site.haruhana.www.dto.problem.ProblemSortType;
 import site.haruhana.www.dto.problem.ProblemSummaryDto;
 import site.haruhana.www.entity.problem.Problem;
@@ -30,15 +31,17 @@ public class ProblemService {
      * @param category   문제 카테고리
      * @param difficulty 문제 난이도
      * @param sortType   문제 정렬 기준
-     * @return {@link Page<ProblemSummaryDto>} 문제 목록
+     * @return {@link ProblemPage} 문제 목록
      */
     @Transactional(readOnly = true)
-    public Page<ProblemSummaryDto> getProblems(int page, int size, ProblemCategory category, ProblemDifficulty difficulty, ProblemSortType sortType) {
-        return problemRepository.findProblemsWithFilters(
+    public ProblemPage<ProblemSummaryDto> getProblems(int page, int size, ProblemCategory category, ProblemDifficulty difficulty, ProblemSortType sortType) {
+        Page<ProblemSummaryDto> problems = problemRepository.findProblemsWithFilters(
                 PageRequest.of(page, size, sortType.getSort()),
                 category,
                 difficulty
         );
+
+        return new ProblemPage<>(problems);
     }
 
     /**
