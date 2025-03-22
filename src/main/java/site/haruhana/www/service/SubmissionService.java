@@ -13,6 +13,7 @@ import site.haruhana.www.entity.submission.Submission;
 import site.haruhana.www.entity.user.User;
 import site.haruhana.www.exception.ProblemNotFoundException;
 import site.haruhana.www.queue.SubmissionMessageQueue;
+import site.haruhana.www.queue.wrapper.GradingData;
 import site.haruhana.www.repository.ProblemRepository;
 import site.haruhana.www.repository.SubmissionRepository;
 
@@ -55,17 +56,17 @@ public class SubmissionService {
                 .submittedAnswer(requestDto.getAnswer())
                 .build();
 
+        // 제출 저장 (ID 부여를 위해 먼저 저장)
+        submission = submissionRepository.save(submission);
+
         // 문제 유형에 따라 처리
         if (problem.getType() == ProblemType.MULTIPLE_CHOICE) { // 객관식 문제인 경우
-            boolean isCorrect = gradeMultipleChoiceSubmission(submission); // 즉시 채점
-            submission.updateCorrectness(isCorrect);
+            boolean isCorrect = gradeMultipleChoiceSubmission(submission); // 문제를 채점하고
+            submission.updateCorrectness(isCorrect); // 정답 여부 업데이트
 
         } else { // 주관식 문제인 경우
-            messageQueue.enqueue(submission); // 채점 대기 큐에 추가
+            messageQueue.enqueue(GradingData.fromSubmission(submission)); // 채점 대기 큐에 추가
         }
-
-        // 제출 저장
-        submission = submissionRepository.save(submission);
 
         // 문제 풀이 수 증가
         problem.incrementSolvedCount();

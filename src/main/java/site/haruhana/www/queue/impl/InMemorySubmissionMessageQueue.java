@@ -1,8 +1,8 @@
 package site.haruhana.www.queue.impl;
 
 import org.springframework.stereotype.Component;
-import site.haruhana.www.entity.submission.Submission;
 import site.haruhana.www.queue.SubmissionMessageQueue;
+import site.haruhana.www.queue.wrapper.GradingData;
 import site.haruhana.www.queue.wrapper.GradingRequest;
 
 import java.util.concurrent.PriorityBlockingQueue;
@@ -13,22 +13,22 @@ public class InMemorySubmissionMessageQueue implements SubmissionMessageQueue {
     private final PriorityBlockingQueue<GradingRequest> queue = new PriorityBlockingQueue<>();
 
     @Override
-    public void enqueue(Submission submission) {
-        queue.put(GradingRequest.normal(submission));
+    public void enqueue(GradingData data) {
+        queue.put(GradingRequest.normal(data));
     }
 
     @Override
-    public Submission dequeue() throws InterruptedException {
+    public void prioritize(GradingData data) {
+        queue.put(GradingRequest.high(data));
+    }
+
+    @Override
+    public GradingData dequeue() throws InterruptedException {
         if (queue.isEmpty()) {
             return null;
         }
 
-        return queue.take().getSubmission();
-    }
-
-    @Override
-    public void prioritize(Submission submission) {
-        queue.put(GradingRequest.high(submission));
+        return queue.take().getGradingData();
     }
 
     @Override

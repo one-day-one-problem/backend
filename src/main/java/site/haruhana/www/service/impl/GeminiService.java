@@ -12,12 +12,11 @@ import site.haruhana.www.entity.problem.Problem;
 import site.haruhana.www.entity.problem.ProblemCategory;
 import site.haruhana.www.entity.problem.ProblemDifficulty;
 import site.haruhana.www.entity.problem.ProblemProvider;
-import site.haruhana.www.entity.submission.Submission;
 import site.haruhana.www.feign.GeminiFeignClient;
 import site.haruhana.www.feign.dto.gemini.GeminiRequest;
+import site.haruhana.www.queue.wrapper.GradingData;
 import site.haruhana.www.service.AIService;
 
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -101,25 +100,21 @@ public class GeminiService implements AIService {
     }
 
     @Override
-    public GradingResult gradeSubjectiveSubmission(Submission submission) {
+    public GradingResult gradeSubjectiveSubmission(GradingData data) {
         try {
-            Problem problem = submission.getProblem();
-            String userAnswer = submission.getSubmittedAnswer();
-            List<String> gradingCriteria = problem.getGradingCriteriaList();
-
             // 채점 기준 목록을 번호가 있는 목록 형태로 변환
-            String formattedCriteria = IntStream.range(0, gradingCriteria.size())
-                    .mapToObj(i -> (i + 1) + ". " + gradingCriteria.get(i))
+            String formattedCriteria = IntStream.range(0, data.getGradingCriteria().size())
+                    .mapToObj(i -> (i + 1) + ". " + data.getGradingCriteria().get(i))
                     .collect(Collectors.joining("\n"));
 
             // 프롬프트 생성
             String gradingPrompt = String.format(
                     SUBJECTIVE_GRADING_PROMPT,
-                    problem.getTitle(),
-                    problem.getQuestion(),
+                    data.getProblemTitle(),
+                    data.getProblemQuestion(),
                     formattedCriteria,
-                    problem.getSampleAnswer(),
-                    userAnswer
+                    data.getSampleAnswer(),
+                    data.getSubmittedAnswer()
             );
 
             // AI에 채점 요청
@@ -156,13 +151,13 @@ public class GeminiService implements AIService {
                 }
             }
 
-            log.info("제출 #{} 채점 완료: {}점", submission.getId(), totalScore);
+            log.info("제출 #{} 채점 완료: {}점", data.getSubmissionId(), totalScore);
 
             // 결과 반환
             return new GradingResult(totalScore, feedbackBuilder.toString().trim());
 
         } catch (Exception e) {
-            log.error("제출 #{} 채점 중 오류 발생: {}", submission.getId(), e.getMessage());
+            log.error("제출 #{} 채점 중 오류 발생: {}", data.getSubmissionId(), e.getMessage());
             throw new RuntimeException("AI를 통한 주관식 문제 채점에 실패했습니다", e);
         }
     }

@@ -5,10 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import site.haruhana.www.entity.problem.Problem;
-import site.haruhana.www.entity.problem.ProblemType;
 import site.haruhana.www.entity.submission.Submission;
 import site.haruhana.www.queue.SubmissionMessageQueue;
+import site.haruhana.www.queue.wrapper.GradingData;
 import site.haruhana.www.repository.SubmissionRepository;
 import site.haruhana.www.service.AIService;
 import site.haruhana.www.service.AIService.GradingResult;
@@ -33,10 +32,10 @@ public class SubmissionScheduler {
     @Scheduled(fixedDelay = 6000) // 6초마다 실행
     public void processSubjectiveSubmission() throws InterruptedException {
         if (!messageQueue.isEmpty()) {
-            Submission submission = messageQueue.dequeue();
+            GradingData gradingData = messageQueue.dequeue();
 
-            if (submission != null) {
-                gradeSubjectiveSubmission(submission);
+            if (gradingData != null) {
+                gradeSubjectiveSubmission(gradingData);
             }
         }
     }
@@ -44,29 +43,26 @@ public class SubmissionScheduler {
     /**
      * 주관식 문제를 채점하는 메서드
      *
-     * @param submission 채점할 제출 내역
+     * @param gradingData 채점할 데이터
      */
-    @Transactional
-    protected void gradeSubjectiveSubmission(Submission submission) {
+    private void gradeSubjectiveSubmission(GradingData gradingData) {
         try {
-            Problem problem = submission.getProblem();
-
-            if (problem.getType() != ProblemType.SUBJECTIVE) {
-                throw new IllegalArgumentException("주관식 문제만 채점할 수 있습니다.");
-            }
-
             // AI 서비스를 통한 채점 요청
-            GradingResult result = aiService.gradeSubjectiveSubmission(submission);
+            GradingResult result = aiService.gradeSubjectiveSubmission(gradingData);
 
-            // 채점 결과 저장
+            // 제출물 조회
+            Submission submission = submissionRepository.findById(gradingData.getSubmissionId())
+                    .orElseThrow(() -> new IllegalArgumentException("제출 정보가 존재하지 않습니다"));
+
+            // 채점 결과 업데이트
             submission.updateGradingResult(result.score(), result.feedback());
             submissionRepository.save(submission);
 
-            log.info("주관식 문제 제출 #{} 채점 완료: {}점", submission.getId(), result.score());
+            log.info("주관식 문제 제출 #{} 채점 완료: {}점 / 남은 채점 대기 수: {}", gradingData.getSubmissionId(), result.score(), messageQueue.size());
 
-        } catch (Exception e) {
-            log.error("제출 #{} 채점 중 오류 발생: {}", submission.getId(), e.getMessage());
-            messageQueue.prioritize(submission); // 오류 발생 시 큐의 맨 앞에 다시 추가
+        } catch (Exception e) { // AI 서비스 호출 중 오류 발생 시
+            log.error("제출 #{} 채점 중 오류 발생: {}", gradingData.getSubmissionId(), e.getMessage());
+            messageQueue.prioritize(gradingData); // 높은 우선순위로 다시 큐에 넣어 재시도
         }
     }
 

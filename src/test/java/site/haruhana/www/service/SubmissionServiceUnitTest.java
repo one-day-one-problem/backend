@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,6 +21,7 @@ import site.haruhana.www.entity.user.Role;
 import site.haruhana.www.entity.user.User;
 import site.haruhana.www.exception.ProblemNotFoundException;
 import site.haruhana.www.queue.SubmissionMessageQueue;
+import site.haruhana.www.queue.wrapper.GradingData;
 import site.haruhana.www.repository.ProblemRepository;
 import site.haruhana.www.repository.SubmissionRepository;
 
@@ -99,7 +101,7 @@ class SubmissionServiceUnitTest {
                     "정답 제출 검증",
                     () -> assertThat(responseDto.getIsCorrect()).isTrue(),
                     () -> verify(submissionRepository, times(1)).save(any(Submission.class)),
-                    () -> verify(messageQueue, never()).enqueue(any(Submission.class)) // 주관식 문제 채점 큐에 추가되지 않음
+                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class)) // 주관식 문제 채점 큐에 추가되지 않음
             );
         }
 
@@ -131,7 +133,7 @@ class SubmissionServiceUnitTest {
                     "부분 정답 제출 검증",
                     () -> assertThat(responseDto.getIsCorrect()).isFalse(),
                     () -> verify(submissionRepository, times(1)).save(any(Submission.class)),
-                    () -> verify(messageQueue, never()).enqueue(any(Submission.class)) // 주관식 문제 채점 큐에 추가되지 않음
+                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class)) // 주관식 문제 채점 큐에 추가되지 않음
             );
         }
 
@@ -163,7 +165,7 @@ class SubmissionServiceUnitTest {
                     "정답+오답 혼합 제출 검증",
                     () -> assertThat(responseDto.getIsCorrect()).isFalse(),
                     () -> verify(submissionRepository, times(1)).save(any(Submission.class)),
-                    () -> verify(messageQueue, never()).enqueue(any(Submission.class)) // 주관식 문제 채점 큐에 추가되지 않음
+                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class)) // 주관식 문제 채점 큐에 추가되지 않음
             );
         }
 
@@ -195,7 +197,7 @@ class SubmissionServiceUnitTest {
                     "오답 제출 검증",
                     () -> assertThat(responseDto.getIsCorrect()).isFalse(),
                     () -> verify(submissionRepository, times(1)).save(any(Submission.class)),
-                    () -> verify(messageQueue, never()).enqueue(any(Submission.class)) // 주관식 문제 채점 큐에 추가되지 않음
+                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class)) // 주관식 문제 채점 큐에 추가되지 않음
             );
         }
 
@@ -228,7 +230,7 @@ class SubmissionServiceUnitTest {
                     () -> assertThat(responseDto.getIsCorrect()).isFalse(),
                     () -> assertThat(responseDto.getId()).isEqualTo(1L),
                     () -> verify(submissionRepository, times(1)).save(any(Submission.class)),
-                    () -> verify(messageQueue, never()).enqueue(any(Submission.class)) // 주관식 문제 채점 큐에 추가되지 않음
+                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class)) // 주관식 문제 채점 큐에 추가되지 않음
             );
         }
     }
@@ -260,12 +262,20 @@ class SubmissionServiceUnitTest {
             SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, requestDto);
 
             // then: 채점 큐에 추가되고 pending 상태로 응답된다
+            ArgumentCaptor<GradingData> gradingDataCaptor = ArgumentCaptor.forClass(GradingData.class);
+            
             assertAll(
                     "주관식 제출 처리 검증",
                     () -> assertThat(responseDto.getIsPending()).isTrue(),
                     () -> assertThat(responseDto.getFeedback()).isNull(),
                     () -> assertThat(responseDto.getScore()).isNull(),
-                    () -> verify(messageQueue, times(1)).enqueue(any(Submission.class)),
+                    () -> verify(messageQueue, times(1)).enqueue(gradingDataCaptor.capture()),
+                    () -> {
+                        GradingData capturedData = gradingDataCaptor.getValue();
+                        assertThat(capturedData.getSubmissionId()).isEqualTo(1L);
+                        assertThat(capturedData.getProblemId()).isEqualTo(2L);
+                        assertThat(capturedData.getSubmittedAnswer()).isEqualTo("주관식 답안 내용입니다.");
+                    },
                     () -> verify(submissionRepository, times(1)).save(any(Submission.class))
             );
         }
