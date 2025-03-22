@@ -43,7 +43,7 @@ public class ProblemController {
 
     @GetMapping("/{problemId}")
     public ResponseEntity<BaseResponse<ProblemDto>> getProblem(@PathVariable Long problemId) {
-        ProblemDto problem = problemService.getProblem(problemId);
-        return ResponseEntity.ok(BaseResponse.onSuccess("문제를 조회하는데 성공했습니다.", problem));
+        ProblemDto data = problemService.getProblem(problemId);
+        return ResponseEntity.ok(BaseResponse.onSuccess("문제를 조회하는데 성공했습니다.", data));
     }
 }
