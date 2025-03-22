@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import site.haruhana.www.entity.submission.Submission;
+import site.haruhana.www.exception.SubmissionNotFoundException;
 import site.haruhana.www.queue.SubmissionMessageQueue;
 import site.haruhana.www.queue.message.GradingData;
 import site.haruhana.www.repository.SubmissionRepository;
@@ -51,7 +52,7 @@ public class SubmissionScheduler {
 
             // 제출물 조회
             Submission submission = submissionRepository.findById(gradingData.getSubmissionId())
-                    .orElseThrow(() -> new IllegalArgumentException("제출 정보가 존재하지 않습니다"));
+                    .orElseThrow(SubmissionNotFoundException::new);
 
             // 채점 결과 업데이트
             submission.updateGradingResult(result.score(), result.feedback());
