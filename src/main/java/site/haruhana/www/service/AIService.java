@@ -3,7 +3,7 @@ package site.haruhana.www.service;
 import site.haruhana.www.entity.problem.Problem;
 import site.haruhana.www.entity.problem.ProblemCategory;
 import site.haruhana.www.entity.problem.ProblemDifficulty;
-import site.haruhana.www.entity.submission.Submission;
+import site.haruhana.www.queue.wrapper.GradingData;
 
 public interface AIService {
 
@@ -204,12 +204,12 @@ public interface AIService {
     Problem generateSubjectiveQuestion(ProblemCategory category, ProblemDifficulty difficulty);
 
     /**
-     * 사용자의 주관식 문제 풀이를 채점하는 메소드
+     * 사용자의 주관식 답안을 채점하는 메소드
      *
-     * @param submission 사용자가 제출한 주관식 문제 풀이
-     * @return 점수와 피드백을 포함한 채점 결과 객체
+     * @param data 채점 데이터
+     * @return 채점 결과 (점수와 피드백)
      */
-    GradingResult gradeSubjectiveSubmission(Submission submission);
+    GradingResult gradeSubjectiveSubmission(GradingData data);
 
     /**
      * 주관식 채점 결과를 담는 레코드

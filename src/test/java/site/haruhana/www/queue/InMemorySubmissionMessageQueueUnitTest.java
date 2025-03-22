@@ -8,12 +8,9 @@ import site.haruhana.www.entity.problem.Problem;
 import site.haruhana.www.entity.problem.ProblemCategory;
 import site.haruhana.www.entity.problem.ProblemDifficulty;
 import site.haruhana.www.entity.problem.ProblemProvider;
-import site.haruhana.www.entity.submission.Submission;
-import site.haruhana.www.entity.user.Role;
-import site.haruhana.www.entity.user.User;
 import site.haruhana.www.queue.impl.InMemorySubmissionMessageQueue;
+import site.haruhana.www.queue.wrapper.GradingData;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -30,19 +27,9 @@ class InMemorySubmissionMessageQueueUnitTest {
 
     private Problem testProblem;
 
-    private User testUser;
-
     @BeforeEach
     void setUp() {
         messageQueue = new InMemorySubmissionMessageQueue();
-
-        // 테스트용 사용자와 문제 생성
-        testUser = User.builder()
-                .id(1L)
-                .name("Test User")
-                .email("test@example.com")
-                .role(Role.USER)
-                .build();
 
         testProblem = Problem.subjectiveProblemBuilder()
                 .title("Test Problem")
@@ -53,13 +40,14 @@ class InMemorySubmissionMessageQueueUnitTest {
                 .build();
     }
 
-    private Submission createSubmission(Long id) {
-        return Submission.builder()
-                .id(id)
-                .user(testUser)
-                .problem(testProblem)
-                .submittedAt(LocalDateTime.now())
-                .duration(300)
+    private GradingData createGradingData(Long id) {
+        return GradingData.builder()
+                .submissionId(id)
+                .problemId(testProblem.getId())
+                .problemTitle(testProblem.getTitle())
+                .problemQuestion(testProblem.getQuestion())
+                .gradingCriteria(Collections.singletonList("Test criteria"))
+                .sampleAnswer("Sample answer")
                 .submittedAnswer("Test Answer")
                 .build();
     }
@@ -86,8 +74,8 @@ class InMemorySubmissionMessageQueueUnitTest {
         void shouldIncreaseSize() {
             // given: 비어있는 큐가 주어졌을 때
 
-            // when: 제출물을 큐에 추가하면
-            messageQueue.enqueue(createSubmission(1L));
+            // when: 채점 데이터를 큐에 추가하면
+            messageQueue.enqueue(createGradingData(1L));
 
             // then: 큐의 사이즈가 증가하고 비어있지 않아야 한다
             assertAll(
@@ -103,7 +91,7 @@ class InMemorySubmissionMessageQueueUnitTest {
             // given: 비어있는 큐가 주어졌을 때
 
             // when: dequeue를 수행하면
-            Submission result = messageQueue.dequeue();
+            GradingData result = messageQueue.dequeue();
 
             // then: null이 반환된다
             assertThat(result).isNull();
@@ -112,10 +100,10 @@ class InMemorySubmissionMessageQueueUnitTest {
         @Test
         @DisplayName("일반 우선순위로 등록된 항목들은 FIFO 순서로 처리된다")
         void normalPriorityItemsAreProcessedInFifoOrder() {
-            // given: 세 개의 일반 우선순위 제출물이 있을 때
-            Submission first = createSubmission(1L);
-            Submission second = createSubmission(2L);
-            Submission third = createSubmission(3L);
+            // given: 세 개의 일반 우선순위 채점 데이터가 있을 때
+            GradingData first = createGradingData(1L);
+            GradingData second = createGradingData(2L);
+            GradingData third = createGradingData(3L);
 
             // when: 일반 우선순위로 순서대로 큐에 추가하면
             messageQueue.enqueue(first);
@@ -125,9 +113,9 @@ class InMemorySubmissionMessageQueueUnitTest {
             // then: FIFO 순서대로 처리된다
             assertAll(
                     "일반 우선순위 FIFO 순서 검증",
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(1L),
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(2L),
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(3L)
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(1L),
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(2L),
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(3L)
             );
         }
 
@@ -137,7 +125,7 @@ class InMemorySubmissionMessageQueueUnitTest {
             // given: 비어있는 큐가 주어졌을 때
 
             // when: 하나의 항목을 추가하면
-            messageQueue.enqueue(createSubmission(1L));
+            messageQueue.enqueue(createGradingData(1L));
 
             // then: 큐가 비어있지 않다고 반환한다
             assertThat(messageQueue.isEmpty()).isFalse();
@@ -160,9 +148,9 @@ class InMemorySubmissionMessageQueueUnitTest {
             assertThat(messageQueue.size()).isEqualTo(0);
 
             // when: 여러 항목을 추가하면
-            messageQueue.enqueue(createSubmission(1L));
-            messageQueue.enqueue(createSubmission(2L));
-            messageQueue.prioritize(createSubmission(3L));
+            messageQueue.enqueue(createGradingData(1L));
+            messageQueue.enqueue(createGradingData(2L));
+            messageQueue.prioritize(createGradingData(3L));
 
             // then: 큐의 크기가 정확하게 반영된다
             assertThat(messageQueue.size()).isEqualTo(3);
@@ -194,12 +182,12 @@ class InMemorySubmissionMessageQueueUnitTest {
             List<Long> priorityIds = new ArrayList<>();
 
             for (int i = 0; i < 20; i++) {
-                messageQueue.enqueue(createSubmission((long) i));
+                messageQueue.enqueue(createGradingData((long) i));
                 normalIds.add((long) i);
             }
 
             for (int i = 100; i < 105; i++) {
-                messageQueue.prioritize(createSubmission((long) i));
+                messageQueue.prioritize(createGradingData((long) i));
                 priorityIds.add((long) i);
             }
 
@@ -209,13 +197,13 @@ class InMemorySubmissionMessageQueueUnitTest {
                     () -> {
                         // 우선순위 항목이 먼저 처리되는지 확인
                         for (int i = 0; i < 5; i++) {
-                            assertThat(messageQueue.dequeue().getId()).isEqualTo(priorityIds.get(i));
+                            assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(priorityIds.get(i));
                         }
                     },
                     () -> {
                         // 그 다음 일반 항목이 처리되는지 확인
                         for (int i = 0; i < 20; i++) {
-                            assertThat(messageQueue.dequeue().getId()).isEqualTo(normalIds.get(i));
+                            assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(normalIds.get(i));
                         }
                     }
             );
@@ -225,31 +213,31 @@ class InMemorySubmissionMessageQueueUnitTest {
         @DisplayName("prioritize 메소드는 항목을 큐의 맨 앞에 추가한다")
         void prioritizeAddsItemToFrontOfQueue() {
             // given: 두 개의 일반 우선순위 항목이 큐에 있을 때
-            Submission normal1 = createSubmission(1L);
-            Submission normal2 = createSubmission(2L);
+            GradingData normal1 = createGradingData(1L);
+            GradingData normal2 = createGradingData(2L);
             messageQueue.enqueue(normal1);
             messageQueue.enqueue(normal2);
 
             // when: 높은 우선순위로 새로운 항목을 추가하면
-            Submission highPriority = createSubmission(3L);
+            GradingData highPriority = createGradingData(3L);
             messageQueue.prioritize(highPriority);
 
             // then: 우선순위가 높은 항목이 가장 먼저 처리된다
             assertAll(
                     "우선순위 항목 처리 순서 검증",
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(3L),
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(1L),
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(2L)
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(3L),
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(1L),
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(2L)
             );
         }
 
         @Test
         @DisplayName("여러 높은 우선순위 항목들은 추가된 순서대로 처리된다 (FIFO)")
         void multiplePriorityItemsAreProcessedInFifoOrder() {
-            // given: 세 개의 높은 우선순위 제출물이 주어졌을 때
-            Submission highPriority1 = createSubmission(1L);
-            Submission highPriority2 = createSubmission(2L);
-            Submission highPriority3 = createSubmission(3L);
+            // given: 세 개의 높은 우선순위 채점 데이터가 주어졌을 때
+            GradingData highPriority1 = createGradingData(1L);
+            GradingData highPriority2 = createGradingData(2L);
+            GradingData highPriority3 = createGradingData(3L);
 
             // when: 순서대로 우선순위 큐에 추가하면
             messageQueue.prioritize(highPriority1);
@@ -259,9 +247,9 @@ class InMemorySubmissionMessageQueueUnitTest {
             // then: 추가된 순서대로 처리된다 (FIFO)
             assertAll(
                     "높은 우선순위 항목 FIFO 검증",
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(1L),
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(2L),
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(3L)
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(1L),
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(2L),
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(3L)
             );
         }
 
@@ -269,11 +257,11 @@ class InMemorySubmissionMessageQueueUnitTest {
         @DisplayName("일반 항목과 우선순위 항목이 섞여있을 때 우선순위 그룹 내에서 FIFO로 처리되고, 그 다음 일반 항목이 처리된다")
         void mixedPriorityAndNormalItemsAreProcessedInOrder() {
             // given: 일반 항목과 우선순위 항목이 섞여있는 상태가 주어졌을 때
-            Submission normal1 = createSubmission(1L);
-            Submission normal2 = createSubmission(2L);
-            Submission highPriority1 = createSubmission(3L);
-            Submission normal3 = createSubmission(4L);
-            Submission highPriority2 = createSubmission(5L);
+            GradingData normal1 = createGradingData(1L);
+            GradingData normal2 = createGradingData(2L);
+            GradingData highPriority1 = createGradingData(3L);
+            GradingData normal3 = createGradingData(4L);
+            GradingData highPriority2 = createGradingData(5L);
 
             // when: 순서대로 큐에 추가하면
             messageQueue.enqueue(normal1);
@@ -285,11 +273,11 @@ class InMemorySubmissionMessageQueueUnitTest {
             // then: 우선순위 그룹이 먼저 FIFO로 처리되고, 그 다음 일반 항목이 FIFO로 처리된다
             assertAll(
                     "혼합 항목 처리 순서 검증",
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(3L),
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(5L),
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(1L),
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(2L),
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(4L)
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(3L),
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(5L),
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(1L),
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(2L),
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(4L)
             );
         }
 
@@ -297,12 +285,12 @@ class InMemorySubmissionMessageQueueUnitTest {
         @DisplayName("우선순위 큐는 우선순위 그룹별로 FIFO를 보장한다")
         void queueMaintainsFifoOrderWithinPriorityGroups() {
             // given: 각 우선순위 그룹별로 여러 항목이 주어졌을 때
-            Submission highPriority1 = createSubmission(1L);
-            Submission highPriority2 = createSubmission(2L);
-            Submission normal1 = createSubmission(3L);
-            Submission normal2 = createSubmission(4L);
-            Submission highPriority3 = createSubmission(5L);
-            Submission normal3 = createSubmission(6L);
+            GradingData highPriority1 = createGradingData(1L);
+            GradingData highPriority2 = createGradingData(2L);
+            GradingData normal1 = createGradingData(3L);
+            GradingData normal2 = createGradingData(4L);
+            GradingData highPriority3 = createGradingData(5L);
+            GradingData normal3 = createGradingData(6L);
 
             // when: 다양한 순서로 큐에 추가하면
             messageQueue.prioritize(highPriority1);
@@ -316,13 +304,13 @@ class InMemorySubmissionMessageQueueUnitTest {
             assertAll(
                     "우선순위 그룹별 FIFO 순서 검증",
                     // 우선순위 그룹 먼저 처리 (FIFO)
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(1L),
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(2L),
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(5L),
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(1L),
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(2L),
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(5L),
                     // 그 다음 일반 그룹 처리 (FIFO)
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(3L),
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(4L),
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(6L)
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(3L),
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(4L),
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(6L)
             );
         }
 
@@ -330,11 +318,11 @@ class InMemorySubmissionMessageQueueUnitTest {
         @DisplayName("일반 항목과 우선순위 항목이 섞여있을 때 우선순위 항목이 먼저 처리된다")
         void priorityItemsAreProcessedBeforeNormalItems() {
             // given: 일반 항목과 우선순위 항목이 섞여있는 상태가 주어졌을 때
-            Submission normal1 = createSubmission(1L);
-            Submission normal2 = createSubmission(2L);
-            Submission highPriority1 = createSubmission(3L);
-            Submission normal3 = createSubmission(4L);
-            Submission highPriority2 = createSubmission(5L);
+            GradingData normal1 = createGradingData(1L);
+            GradingData normal2 = createGradingData(2L);
+            GradingData highPriority1 = createGradingData(3L);
+            GradingData normal3 = createGradingData(4L);
+            GradingData highPriority2 = createGradingData(5L);
 
             // when: 섞인 순서로 큐에 추가하면
             messageQueue.enqueue(normal1);
@@ -346,11 +334,11 @@ class InMemorySubmissionMessageQueueUnitTest {
             // then: 우선순위 항목이 먼저 처리되고, 그 다음 일반 항목이 처리된다
             assertAll(
                     "우선순위 처리 순서 검증",
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(3L),
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(5L),
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(1L),
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(2L),
-                    () -> assertThat(messageQueue.dequeue().getId()).isEqualTo(4L)
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(3L),
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(5L),
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(1L),
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(2L),
+                    () -> assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(4L)
             );
         }
     }
@@ -367,13 +355,13 @@ class InMemorySubmissionMessageQueueUnitTest {
 
             // 100개의 우선순위 항목 추가
             for (int i = 0; i < 100; i++) {
-                messageQueue.prioritize(createSubmission((long) i + 1000));
+                messageQueue.prioritize(createGradingData((long) i + 1000));
                 expectedOrder.add((long) i + 1000);
             }
 
             // 1000개의 일반 항목 추가
             for (int i = 0; i < 1000; i++) {
-                messageQueue.enqueue(createSubmission((long) i));
+                messageQueue.enqueue(createGradingData((long) i));
                 expectedOrder.add((long) i);
             }
 
@@ -383,13 +371,13 @@ class InMemorySubmissionMessageQueueUnitTest {
                     () -> {
                         // 우선순위 항목 검증 (처음 100개)
                         for (int i = 0; i < 100; i++) {
-                            assertThat(messageQueue.dequeue().getId()).isEqualTo(expectedOrder.get(i));
+                            assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(expectedOrder.get(i));
                         }
                     },
                     () -> {
                         // 일반 항목 검증 (나머지 1000개)
                         for (int i = 100; i < 1100; i++) {
-                            assertThat(messageQueue.dequeue().getId()).isEqualTo(expectedOrder.get(i));
+                            assertThat(messageQueue.dequeue().getSubmissionId()).isEqualTo(expectedOrder.get(i));
                         }
                     },
                     () -> assertThat(messageQueue.isEmpty()).isTrue()
@@ -418,9 +406,9 @@ class InMemorySubmissionMessageQueueUnitTest {
                         for (int j = 0; j < itemsPerThread; j++) {
                             long id = finalI * itemsPerThread + j;
                             if (j % 5 == 0) { // 20%는 우선순위 항목으로 처리
-                                messageQueue.prioritize(createSubmission(id));
+                                messageQueue.prioritize(createGradingData(id));
                             } else {
-                                messageQueue.enqueue(createSubmission(id));
+                                messageQueue.enqueue(createGradingData(id));
                             }
                         }
                     } finally {
@@ -438,8 +426,8 @@ class InMemorySubmissionMessageQueueUnitTest {
                     () -> assertThat(messageQueue.size()).isEqualTo(producerThreads * itemsPerThread),
                     () -> {
                         while (!messageQueue.isEmpty()) {
-                            Submission submission = messageQueue.dequeue();
-                            processedIds.add(submission.getId());
+                            GradingData data = messageQueue.dequeue();
+                            processedIds.add(data.getSubmissionId());
                         }
                         assertThat(processedIds).hasSize(producerThreads * itemsPerThread);
                     }
@@ -461,7 +449,7 @@ class InMemorySubmissionMessageQueueUnitTest {
                 executor.submit(() -> {
                     try {
                         for (int j = 0; j < itemsPerThread; j++) {
-                            messageQueue.enqueue(createSubmission((long) (finalI * itemsPerThread + j)));
+                            messageQueue.enqueue(createGradingData((long) (finalI * itemsPerThread + j)));
                         }
                     } finally {
                         latch.countDown();
@@ -482,22 +470,22 @@ class InMemorySubmissionMessageQueueUnitTest {
             // given: 여러 항목이 큐에 저장되어 있고 여러 스레드가 주어졌을 때
             int itemCount = 1000;
             for (int i = 0; i < itemCount; i++) {
-                messageQueue.enqueue(createSubmission((long) i));
+                messageQueue.enqueue(createGradingData((long) i));
             }
 
             int threadCount = 10;
             ExecutorService executor = Executors.newFixedThreadPool(threadCount);
             CountDownLatch latch = new CountDownLatch(threadCount);
-            List<Submission> processedItems = Collections.synchronizedList(new ArrayList<>());
+            List<GradingData> processedItems = Collections.synchronizedList(new ArrayList<>());
 
             // when: 여러 스레드에서 동시에 dequeue를 수행하면
             for (int i = 0; i < threadCount; i++) {
                 executor.submit(() -> {
                     try {
                         while (true) {
-                            Submission submission = messageQueue.dequeue();
-                            if (submission == null) break;
-                            processedItems.add(submission);
+                            GradingData data = messageQueue.dequeue();
+                            if (data == null) break;
+                            processedItems.add(data);
                         }
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
@@ -516,7 +504,7 @@ class InMemorySubmissionMessageQueueUnitTest {
                     () -> assertThat(processedItems).hasSize(itemCount),
                     () -> assertThat(messageQueue.isEmpty()).isTrue(),
                     () -> {
-                        List<Long> ids = processedItems.stream().map(Submission::getId).toList();
+                        List<Long> ids = processedItems.stream().map(GradingData::getSubmissionId).toList();
                         Set<Long> uniqueIds = new HashSet<>(ids);
                         assertThat(uniqueIds).hasSize(itemCount);
                     }
