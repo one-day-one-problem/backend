@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import site.haruhana.www.base.BaseResponse;
+import site.haruhana.www.dto.BaseResponse;
 import site.haruhana.www.dto.problem.ProblemDto;
 import site.haruhana.www.dto.problem.ProblemPage;
 import site.haruhana.www.dto.problem.ProblemSortType;
