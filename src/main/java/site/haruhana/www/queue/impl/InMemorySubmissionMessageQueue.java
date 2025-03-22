@@ -2,8 +2,8 @@ package site.haruhana.www.queue.impl;
 
 import org.springframework.stereotype.Component;
 import site.haruhana.www.queue.SubmissionMessageQueue;
-import site.haruhana.www.queue.wrapper.GradingData;
-import site.haruhana.www.queue.wrapper.GradingRequest;
+import site.haruhana.www.queue.message.GradingData;
+import site.haruhana.www.queue.message.GradingRequest;
 
 import java.util.concurrent.PriorityBlockingQueue;
 

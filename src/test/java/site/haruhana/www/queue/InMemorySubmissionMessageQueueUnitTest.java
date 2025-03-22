@@ -9,7 +9,7 @@ import site.haruhana.www.entity.problem.ProblemCategory;
 import site.haruhana.www.entity.problem.ProblemDifficulty;
 import site.haruhana.www.entity.problem.ProblemProvider;
 import site.haruhana.www.queue.impl.InMemorySubmissionMessageQueue;
-import site.haruhana.www.queue.wrapper.GradingData;
+import site.haruhana.www.queue.message.GradingData;
 
 import java.util.*;
 import java.util.concurrent.CountDownLatch;

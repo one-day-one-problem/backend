@@ -1,4 +1,4 @@
-package site.haruhana.www.queue.wrapper;
+package site.haruhana.www.queue.message;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

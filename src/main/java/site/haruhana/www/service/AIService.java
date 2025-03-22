@@ -3,7 +3,7 @@ package site.haruhana.www.service;
 import site.haruhana.www.entity.problem.Problem;
 import site.haruhana.www.entity.problem.ProblemCategory;
 import site.haruhana.www.entity.problem.ProblemDifficulty;
-import site.haruhana.www.queue.wrapper.GradingData;
+import site.haruhana.www.queue.message.GradingData;
 
 public interface AIService {
 
