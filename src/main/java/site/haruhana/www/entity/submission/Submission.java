@@ -89,7 +89,7 @@ public class Submission {
      *
      * @param result 채점 결과
      */
-    public void updateGradingResult(GradingResult result) {
+    public void updateSubjectiveGradingResult(GradingResult result) {
         this.score = result.score();
         this.isCorrect = result.isCorrect();
         this.feedback = result.feedback();
@@ -101,7 +101,7 @@ public class Submission {
      *
      * @param isCorrect 정답 여부
      */
-    public void updateCorrectness(boolean isCorrect) {
+    public void updateMultipleChoiceGradingResult(boolean isCorrect) {
         this.isCorrect = isCorrect;
     }
 

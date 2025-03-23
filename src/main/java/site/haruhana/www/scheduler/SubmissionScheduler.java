@@ -55,7 +55,7 @@ public class SubmissionScheduler {
                     .orElseThrow(SubmissionNotFoundException::new);
 
             // 채점 결과 업데이트
-            submission.updateGradingResult(result);
+            submission.updateSubjectiveGradingResult(result);
             submissionRepository.save(submission);
 
             log.info("주관식 문제 제출 #{} 채점 완료: {}점 (정답 여부: {}) / 남은 채점 대기 수: {}", gradingData.getSubmissionId(), result.score(), result.isCorrect(), messageQueue.size());

@@ -62,7 +62,7 @@ public class SubmissionService {
         // 문제 유형에 따라 처리
         if (problem.getType() == ProblemType.MULTIPLE_CHOICE) { // 객관식 문제인 경우
             boolean isCorrect = gradeMultipleChoiceSubmission(submission); // 문제를 채점하고
-            submission.updateCorrectness(isCorrect); // 정답 여부 업데이트
+            submission.updateMultipleChoiceGradingResult(isCorrect); // 정답 여부 업데이트
 
         } else { // 주관식 문제인 경우
             messageQueue.enqueue(GradingData.fromSubmission(submission)); // 채점 대기 큐에 추가
