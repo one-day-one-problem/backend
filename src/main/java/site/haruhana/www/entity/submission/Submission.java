@@ -101,7 +101,7 @@ public class Submission {
      *
      * @param isCorrect 정답 여부
      */
-    public void updateCorrectness(boolean isCorrect) {
+    public void updateMultipleChoiceGradingResult(boolean isCorrect) {
         this.isCorrect = isCorrect;
     }
 
