@@ -216,7 +216,7 @@ public interface AIService {
     /**
      * 주관식 채점 결과를 담는 레코드
      */
-    record GradingResult(int score, String feedback) {
+    record GradingResult(int score, boolean isCorrect, String feedback) {
 
     }
 }
