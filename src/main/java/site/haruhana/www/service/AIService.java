@@ -161,6 +161,7 @@ public interface AIService {
             위 정보를 바탕으로 다음 JSON 형식으로 채점 결과를 제공해주세요:
             {
                 "score": 0~100 사이의 점수(정수),
+                "isCorrect": true/false (문제를 정확하게 해결했는지 여부, 70점 이상이면 true),
                 "feedback": "전체적인 피드백",
                 "criteriaEvaluation": [
                     {
@@ -177,6 +178,7 @@ public interface AIService {
             2. 100점은 모든 기준을 완벽하게 충족했을 때만 부여합니다.
             3. 0점은 답안이 전혀 관련이 없거나 문제를 이해하지 못했을 때 부여합니다.
             4. 부분 점수는 각 기준별 충족도에 따라 부여합니다.
+            5. 70점 이상일 때 정확하게 해결했다고 판단하고 isCorrect를 true로 설정합니다.
             
             피드백 작성 지침:
             1. 구체적이고 건설적인 피드백을 제공합니다.
@@ -214,7 +216,7 @@ public interface AIService {
     /**
      * 주관식 채점 결과를 담는 레코드
      */
-    record GradingResult(int score, String feedback) {
+    record GradingResult(int score, boolean isCorrect, String feedback) {
 
     }
 }

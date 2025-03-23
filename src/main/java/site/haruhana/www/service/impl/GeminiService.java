@@ -122,6 +122,7 @@ public class GeminiService implements AIService {
 
             // 채점 결과 파싱
             int totalScore = json.get("score").asInt();
+            boolean isCorrect = json.get("isCorrect").asBoolean();
             String overallFeedback = json.get("feedback").asText();
             JsonNode criteriaEvaluations = json.get("criteriaEvaluation");
 
@@ -151,10 +152,10 @@ public class GeminiService implements AIService {
                 }
             }
 
-            log.info("제출 #{} 채점 완료: {}점", data.getSubmissionId(), totalScore);
+            log.info("제출 #{} 채점 완료: {}점 (정답 여부: {})", data.getSubmissionId(), totalScore, isCorrect);
 
             // 결과 반환
-            return new GradingResult(totalScore, feedbackBuilder.toString().trim());
+            return new GradingResult(totalScore, isCorrect, feedbackBuilder.toString().trim());
 
         } catch (Exception e) {
             log.error("제출 #{} 채점 중 오류 발생: {}", data.getSubmissionId(), e.getMessage());
