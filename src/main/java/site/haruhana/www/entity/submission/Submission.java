@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import site.haruhana.www.entity.user.User;
 import site.haruhana.www.entity.problem.Problem;
+import site.haruhana.www.service.AIService.GradingResult;
 
 import java.time.LocalDateTime;
 
@@ -60,9 +61,9 @@ public class Submission {
     private String submittedAnswer; // 객관식인 경우에도 String으로 저장. 복수 정답인 경우 콤마(,)로 구분
 
     /**
-     * (객관식) 사용자가 제출한 답안의 정답 여부
+     * 사용자가 제출한 답안의 정답 여부
      */
-    @Column(name = "is_correct", nullable = true)
+    @Column(name = "is_correct", nullable = false)
     private Boolean isCorrect;
 
     /**
@@ -84,14 +85,14 @@ public class Submission {
     private LocalDateTime feedbackProvidedAt;
 
     /**
-     * 주관식 문제의 채점 결과를 업데이트하는 메서드
+     * 주관식 문제 답안의 채점 결과를 업데이트하는 메서드
      *
-     * @param score    점수
-     * @param feedback 피드백
+     * @param result 채점 결과
      */
-    public void updateGradingResult(int score, String feedback) {
-        this.score = score;
-        this.feedback = feedback;
+    public void updateGradingResult(GradingResult result) {
+        this.score = result.score();
+        this.isCorrect = result.isCorrect();
+        this.feedback = result.feedback();
         this.feedbackProvidedAt = LocalDateTime.now();
     }
 
