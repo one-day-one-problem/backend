@@ -20,7 +20,7 @@ public class SubmissionResponseDto {
     private Boolean isCorrect;
     
     // 주관식 문제 전용 필드
-    private Integer score;
+    private Double score;
     private String feedback;
     private LocalDateTime feedbackProvidedAt;
     private Boolean isPending;  // 채점 대기중 여부
