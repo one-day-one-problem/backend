@@ -46,7 +46,7 @@ public class SubmissionService {
     public SubmissionResponseDto submitAnswer(User user, SubmissionRequestDto requestDto) {
         // 문제 조회
         Problem problem = problemRepository.findById(requestDto.getProblemId())
-                .orElseThrow(() -> new ProblemNotFoundException());
+                .orElseThrow(ProblemNotFoundException::new);
 
         // 답안 제출 객체 생성
         Submission submission = Submission.builder()
@@ -74,9 +74,10 @@ public class SubmissionService {
         }
 
         // 응답 생성 및 반환
-        return problem.getType() == ProblemType.MULTIPLE_CHOICE ?
-                SubmissionResponseDto.fromMultipleChoice(submission) :
-                SubmissionResponseDto.fromSubjective(submission);
+        return switch (problem.getType()) {
+            case MULTIPLE_CHOICE -> SubmissionResponseDto.fromMultipleChoice(submission);
+            case SUBJECTIVE -> SubmissionResponseDto.fromSubjective(submission);
+        };
     }
 
     /**

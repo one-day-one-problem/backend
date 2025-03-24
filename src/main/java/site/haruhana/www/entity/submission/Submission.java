@@ -6,8 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
-import site.haruhana.www.entity.user.User;
 import site.haruhana.www.entity.problem.Problem;
+import site.haruhana.www.entity.user.User;
 import site.haruhana.www.service.AIService.GradingResult;
 
 import java.time.LocalDateTime;
@@ -63,25 +63,23 @@ public class Submission {
     /**
      * 사용자가 제출한 답안의 정답 여부
      */
-    @Column(name = "is_correct", nullable = true)
+    @Column(name = "is_correct")
     private Boolean isCorrect;
 
     /**
      * (주관식) 사용자가 제출한 답안에 대한 점수
      */
-    @Column(nullable = true)
     private Double score;
 
     /**
      * (주관식) 사용자가 제출한 답안에 대한 피드백 (by AI)
      */
-    @Column(columnDefinition = "TEXT", nullable = true)
+    @Column(columnDefinition = "TEXT")
     private String feedback;
 
     /**
      * (주관식) 피드백이 제공된 시각
      */
-    @Column(nullable = true)
     private LocalDateTime feedbackProvidedAt;
 
     /**

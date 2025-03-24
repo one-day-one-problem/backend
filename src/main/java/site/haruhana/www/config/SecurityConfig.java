@@ -9,9 +9,9 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import site.haruhana.www.config.security.filter.JwtAuthenticationFilter;
 import site.haruhana.www.config.security.handler.CustomAccessDeniedHandler;
 import site.haruhana.www.config.security.handler.CustomAuthenticationEntryPoint;
-import site.haruhana.www.config.security.filter.JwtAuthenticationFilter;
 import site.haruhana.www.oauth.CustomOAuth2UserService;
 import site.haruhana.www.oauth.handler.OAuth2LoginFailureHandler;
 import site.haruhana.www.oauth.handler.OAuth2LoginSuccessHandler;
