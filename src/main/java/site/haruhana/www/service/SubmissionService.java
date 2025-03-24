@@ -46,7 +46,7 @@ public class SubmissionService {
     public SubmissionResponseDto submitAnswer(User user, SubmissionRequestDto requestDto) {
         // 문제 조회
         Problem problem = problemRepository.findById(requestDto.getProblemId())
-                .orElseThrow(() -> new ProblemNotFoundException());
+                .orElseThrow(ProblemNotFoundException::new);
 
         // 답안 제출 객체 생성
         Submission submission = Submission.builder()
