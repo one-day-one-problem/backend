@@ -74,9 +74,10 @@ public class SubmissionService {
         }
 
         // 응답 생성 및 반환
-        return problem.getType() == ProblemType.MULTIPLE_CHOICE ?
-                SubmissionResponseDto.fromMultipleChoice(submission) :
-                SubmissionResponseDto.fromSubjective(submission);
+        return switch (problem.getType()) {
+            case MULTIPLE_CHOICE -> SubmissionResponseDto.fromMultipleChoice(submission);
+            case SUBJECTIVE -> SubmissionResponseDto.fromSubjective(submission);
+        };
     }
 
     /**
