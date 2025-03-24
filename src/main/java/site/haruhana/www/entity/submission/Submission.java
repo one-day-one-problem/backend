@@ -6,8 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
-import site.haruhana.www.entity.user.User;
 import site.haruhana.www.entity.problem.Problem;
+import site.haruhana.www.entity.user.User;
 import site.haruhana.www.service.AIService.GradingResult;
 
 import java.time.LocalDateTime;

@@ -3,7 +3,6 @@ package site.haruhana.www.dto.submission.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Getter;
-import site.haruhana.www.entity.problem.ProblemType;
 import site.haruhana.www.entity.submission.Submission;
 
 import java.time.LocalDateTime;
