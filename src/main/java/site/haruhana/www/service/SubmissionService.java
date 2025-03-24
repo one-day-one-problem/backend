@@ -11,6 +11,7 @@ import site.haruhana.www.entity.problem.ProblemType;
 import site.haruhana.www.entity.problem.choice.ProblemOption;
 import site.haruhana.www.entity.submission.Submission;
 import site.haruhana.www.entity.user.User;
+import site.haruhana.www.exception.InvalidAnswerFormatException;
 import site.haruhana.www.exception.ProblemNotFoundException;
 import site.haruhana.www.queue.SubmissionMessageQueue;
 import site.haruhana.www.queue.message.GradingData;
@@ -45,7 +46,7 @@ public class SubmissionService {
     public SubmissionResponseDto submitAnswer(User user, SubmissionRequestDto requestDto) {
         // 문제 조회
         Problem problem = problemRepository.findById(requestDto.getProblemId())
-                .orElseThrow(() -> new ProblemNotFoundException());
+                .orElseThrow(ProblemNotFoundException::new);
 
         // 답안 제출 객체 생성
         Submission submission = Submission.builder()
@@ -62,19 +63,21 @@ public class SubmissionService {
         // 문제 유형에 따라 처리
         if (problem.getType() == ProblemType.MULTIPLE_CHOICE) { // 객관식 문제인 경우
             boolean isCorrect = gradeMultipleChoiceSubmission(submission); // 문제를 채점하고
-            submission.updateCorrectness(isCorrect); // 정답 여부 업데이트
+            submission.updateMultipleChoiceGradingResult(isCorrect); // 정답 여부 업데이트
+
+            if (isCorrect) { // 사용자가 정답을 맞췄다면
+                problem.incrementSolvedCount(); // 문제 풀이 횟수 증가
+            }
 
         } else { // 주관식 문제인 경우
             messageQueue.enqueue(GradingData.fromSubmission(submission)); // 채점 대기 큐에 추가
         }
 
-        // 문제 풀이 수 증가
-        problem.incrementSolvedCount();
-
         // 응답 생성 및 반환
-        return problem.getType() == ProblemType.MULTIPLE_CHOICE ? 
-                SubmissionResponseDto.fromMultipleChoice(submission) : 
-                SubmissionResponseDto.fromSubjective(submission);
+        return switch (problem.getType()) {
+            case MULTIPLE_CHOICE -> SubmissionResponseDto.fromMultipleChoice(submission);
+            case SUBJECTIVE -> SubmissionResponseDto.fromSubjective(submission);
+        };
     }
 
     /**
@@ -103,16 +106,22 @@ public class SubmissionService {
      *
      * @param submittedAnswer 제출된 답안 (쉼표로 구분된 문자열)
      * @return 옵션 ID 집합
+     * @throws InvalidAnswerFormatException 입력값이 숫자가 아닌 경우
      */
     private Set<Long> parseSubmittedAnswer(String submittedAnswer) {
         if (submittedAnswer == null || submittedAnswer.trim().isEmpty()) {
             return Collections.emptySet();
         }
 
-        return Arrays.stream(submittedAnswer.split(","))
-                .map(String::trim)
-                .map(Long::valueOf)
-                .collect(Collectors.toSet());
+        try {
+            return Arrays.stream(submittedAnswer.split(","))
+                    .map(String::trim)
+                    .map(Long::valueOf)
+                    .collect(Collectors.toSet());
+
+        } catch (NumberFormatException e) {
+            throw new InvalidAnswerFormatException();
+        }
     }
 
     /**

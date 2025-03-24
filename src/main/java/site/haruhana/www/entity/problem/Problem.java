@@ -103,13 +103,12 @@ public class Problem extends BaseTimeEntity {
     /**
      * (주관식) 예상 답안 길이
      */
-    @Column(nullable = true)
     private String expectedAnswerLength;
 
     /**
      * (주관식) 예시 답안
      */
-    @Column(columnDefinition = "TEXT", nullable = true)
+    @Column(columnDefinition = "TEXT")
     private String sampleAnswer;
 
     @Builder(builderClassName = "MultipleChoiceProblemBuilder")

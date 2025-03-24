@@ -5,8 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import site.haruhana.www.entity.submission.Submission;
+import site.haruhana.www.exception.SubmissionNotFoundException;
 import site.haruhana.www.queue.SubmissionMessageQueue;
 import site.haruhana.www.queue.message.GradingData;
+import site.haruhana.www.repository.ProblemRepository;
 import site.haruhana.www.repository.SubmissionRepository;
 import site.haruhana.www.service.AIService;
 import site.haruhana.www.service.AIService.GradingResult;
@@ -20,6 +22,8 @@ import site.haruhana.www.service.AIService.GradingResult;
 public class SubmissionScheduler {
 
     private final SubmissionMessageQueue messageQueue;
+
+    private final ProblemRepository problemRepository;
 
     private final SubmissionRepository submissionRepository;
 
@@ -51,13 +55,23 @@ public class SubmissionScheduler {
 
             // 제출물 조회
             Submission submission = submissionRepository.findById(gradingData.getSubmissionId())
-                    .orElseThrow(() -> new IllegalArgumentException("제출 정보가 존재하지 않습니다"));
+                    .orElseThrow(SubmissionNotFoundException::new);
 
             // 채점 결과 업데이트
-            submission.updateGradingResult(result.score(), result.feedback());
+            submission.updateSubjectiveGradingResult(result);
+
+            // 정답인 경우, 문제 풀이 카운트 증가
+            if (result.isCorrect()) {
+                problemRepository.findById(gradingData.getProblemId())
+                        .ifPresent(problem -> {
+                            problem.incrementSolvedCount();
+                            problemRepository.save(problem);
+                        });
+            }
+
             submissionRepository.save(submission);
 
-            log.info("주관식 문제 제출 #{} 채점 완료: {}점 / 남은 채점 대기 수: {}", gradingData.getSubmissionId(), result.score(), messageQueue.size());
+            log.info("주관식 문제 제출 #{} 채점 완료: {}점 (정답 여부: {}) / 남은 채점 대기 수: {}", gradingData.getSubmissionId(), result.score(), result.isCorrect(), messageQueue.size());
 
         } catch (Exception e) { // AI 서비스 호출 중 오류 발생 시
             log.error("제출 #{} 채점 중 오류 발생: {}", gradingData.getSubmissionId(), e.getMessage());

@@ -44,7 +44,7 @@ public class User extends BaseTimeEntity {
     /**
      * 사용자 프로필 이미지 URL
      */
-    @Column(name = "profile_image_url", nullable = true) // 사용자가 프로필 이미지 정보 수집을 거부할 수 있으므로 nullable = true
+    @Column(name = "profile_image_url") // 사용자가 프로필 이미지 정보 수집을 거부할 수 있으므로 nullable = true
     private String profileImageUrl;
 
     /**

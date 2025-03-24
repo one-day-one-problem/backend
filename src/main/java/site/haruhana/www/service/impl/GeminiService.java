@@ -17,6 +17,8 @@ import site.haruhana.www.feign.dto.gemini.GeminiRequest;
 import site.haruhana.www.queue.message.GradingData;
 import site.haruhana.www.service.AIService;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -120,20 +122,17 @@ public class GeminiService implements AIService {
             // AI에 채점 요청
             JsonNode json = getAIGeneratedContent(gradingPrompt);
 
-            // 채점 결과 파싱
-            int totalScore = json.get("score").asInt();
+            // 피드백 가져오기
             String overallFeedback = json.get("feedback").asText();
             JsonNode criteriaEvaluations = json.get("criteriaEvaluation");
 
-            // 피드백 포맷팅
+            // 피드백을 정리하기 위한 빌더
             StringBuilder feedbackBuilder = new StringBuilder();
 
-            // 종합적인 평가 추가
-            feedbackBuilder.append("# 종합 평가 결과 (").append(totalScore).append("점)\n\n");
-            feedbackBuilder.append(overallFeedback).append("\n\n");
+            // 평균 점수 계산을 위한 변수
+            double totalScore = 0;
+            int criteriaCount = 0;
 
-            // 각 채점 기준별 평가 추가
-            feedbackBuilder.append("# 평가 기준별 상세 분석\n\n");
             if (criteriaEvaluations != null && criteriaEvaluations.isArray()) {
                 for (int i = 0; i < criteriaEvaluations.size(); i++) {
                     // i번째 채점 기준 평가 정보
@@ -144,6 +143,11 @@ public class GeminiService implements AIService {
                     int criteriaScore = evaluation.get("score").asInt();
                     String criteriaFeedback = evaluation.get("feedback").asText();
 
+                    // 평균 점수 계산을 위해 누적
+                    totalScore += criteriaScore;
+                    criteriaCount++;
+
+                    // 피드백 빌더에 추가
                     feedbackBuilder.append("## ").append(i + 1).append(". ")
                             .append(criteriaName)
                             .append(" (").append(criteriaScore).append("점)\n\n")
@@ -151,10 +155,24 @@ public class GeminiService implements AIService {
                 }
             }
 
-            log.info("제출 #{} 채점 완료: {}점", data.getSubmissionId(), totalScore);
+            // 평균 점수 계산 (소수점 둘째 자리에서 반올림)
+            double averageScore = 0;
+            if (criteriaCount > 0) {
+                averageScore = new BigDecimal(totalScore / criteriaCount)
+                        .setScale(2, RoundingMode.HALF_UP)
+                        .doubleValue();
+            }
+
+            // 종합 평가 추가
+            feedbackBuilder.insert(0, "# 종합 평가 결과 (" + averageScore + "점)\n\n" + overallFeedback + "\n\n");
+
+            // 주관식 문제 해결 여부 판단
+            boolean isCorrect = averageScore >= PASSING_SCORE;
+
+            log.info("제출 #{} 채점 완료: {}점 (정답 여부: {})", data.getSubmissionId(), averageScore, isCorrect);
 
             // 결과 반환
-            return new GradingResult(totalScore, feedbackBuilder.toString().trim());
+            return new GradingResult(averageScore, isCorrect, feedbackBuilder.toString().trim());
 
         } catch (Exception e) {
             log.error("제출 #{} 채점 중 오류 발생: {}", data.getSubmissionId(), e.getMessage());

@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @JsonPropertyOrder({"problems", "currentPage", "pageSize", "totalPages", "totalElements", "numberOfElements", "hasNext", "hasPrevious", "empty"})
 public class ProblemPage<T> {
-    
+
     @JsonProperty("problems")
     private final List<T> problems;            // 문제 목록
 

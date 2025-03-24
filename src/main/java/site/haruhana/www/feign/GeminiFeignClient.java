@@ -23,7 +23,7 @@ public interface GeminiFeignClient {
      * @param apiKey  Gemini 서비스 인증을 위한 API 키
      * @param request 프롬프트와 설정을 포함한 콘텐츠 생성 요청 객체
      * @return 생성된 콘텐츠와 관련 메타데이터를 포함한 응답 객체
-     * @see <a href="https://ai.google.dev/gemini-api/docs/structured-output?hl=ko&lang=web">Gemini API로 구조화된 출력 생성</a>
+     * @see <a href="https://ai.google.dev/gemini-api/docs/structured-output?hl=ko&lang=rest">Gemini API로 구조화된 출력 생성</a>
      */
     @PostMapping("/models/gemini-2.0-flash:generateContent")
     GeminiResponse generateContent(

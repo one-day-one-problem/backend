@@ -1,4 +1,4 @@
-package site.haruhana.www.config.security;
+package site.haruhana.www.config.security.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
