@@ -11,6 +11,7 @@ import site.haruhana.www.entity.problem.ProblemType;
 import site.haruhana.www.entity.problem.choice.ProblemOption;
 import site.haruhana.www.entity.submission.Submission;
 import site.haruhana.www.entity.user.User;
+import site.haruhana.www.exception.InvalidAnswerFormatException;
 import site.haruhana.www.exception.ProblemNotFoundException;
 import site.haruhana.www.queue.SubmissionMessageQueue;
 import site.haruhana.www.queue.message.GradingData;
@@ -73,8 +74,8 @@ public class SubmissionService {
         }
 
         // 응답 생성 및 반환
-        return problem.getType() == ProblemType.MULTIPLE_CHOICE ? 
-                SubmissionResponseDto.fromMultipleChoice(submission) : 
+        return problem.getType() == ProblemType.MULTIPLE_CHOICE ?
+                SubmissionResponseDto.fromMultipleChoice(submission) :
                 SubmissionResponseDto.fromSubjective(submission);
     }
 
@@ -104,16 +105,22 @@ public class SubmissionService {
      *
      * @param submittedAnswer 제출된 답안 (쉼표로 구분된 문자열)
      * @return 옵션 ID 집합
+     * @throws InvalidAnswerFormatException 입력값이 숫자가 아닌 경우
      */
     private Set<Long> parseSubmittedAnswer(String submittedAnswer) {
         if (submittedAnswer == null || submittedAnswer.trim().isEmpty()) {
             return Collections.emptySet();
         }
 
-        return Arrays.stream(submittedAnswer.split(","))
-                .map(String::trim)
-                .map(Long::valueOf)
-                .collect(Collectors.toSet());
+        try {
+            return Arrays.stream(submittedAnswer.split(","))
+                    .map(String::trim)
+                    .map(Long::valueOf)
+                    .collect(Collectors.toSet());
+
+        } catch (NumberFormatException e) {
+            throw new InvalidAnswerFormatException();
+        }
     }
 
     /**
