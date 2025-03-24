@@ -64,12 +64,13 @@ public class SubmissionService {
             boolean isCorrect = gradeMultipleChoiceSubmission(submission); // 문제를 채점하고
             submission.updateMultipleChoiceGradingResult(isCorrect); // 정답 여부 업데이트
 
+            if (isCorrect) { // 사용자가 정답을 맞췄다면
+                problem.incrementSolvedCount(); // 문제 풀이 횟수 증가
+            }
+
         } else { // 주관식 문제인 경우
             messageQueue.enqueue(GradingData.fromSubmission(submission)); // 채점 대기 큐에 추가
         }
-
-        // 문제 풀이 수 증가
-        problem.incrementSolvedCount();
 
         // 응답 생성 및 반환
         return problem.getType() == ProblemType.MULTIPLE_CHOICE ? 
