@@ -63,7 +63,7 @@ public class Submission {
     /**
      * 사용자가 제출한 답안의 정답 여부
      */
-    @Column(name = "is_correct", nullable = false)
+    @Column(name = "is_correct", nullable = true)
     private Boolean isCorrect;
 
     /**
