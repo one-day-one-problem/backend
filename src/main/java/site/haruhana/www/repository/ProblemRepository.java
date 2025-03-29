@@ -9,6 +9,7 @@ import site.haruhana.www.dto.problem.ProblemSummaryDto;
 import site.haruhana.www.entity.problem.Problem;
 import site.haruhana.www.entity.problem.ProblemCategory;
 import site.haruhana.www.entity.problem.ProblemDifficulty;
+import site.haruhana.www.entity.problem.ProblemType;
 
 public interface ProblemRepository extends JpaRepository<Problem, Long> {
 
@@ -24,10 +25,12 @@ public interface ProblemRepository extends JpaRepository<Problem, Long> {
             FROM Problem p
             WHERE (:category IS NULL OR p.category = :category)
             AND (:difficulty IS NULL OR p.difficulty = :difficulty)
+            AND (:type IS NULL OR p.type = :type)
             """)
     Page<ProblemSummaryDto> findProblemsWithFilters(
             Pageable pageable,
             @Param("category") ProblemCategory category,
-            @Param("difficulty") ProblemDifficulty difficulty
+            @Param("difficulty") ProblemDifficulty difficulty,
+            @Param("type") ProblemType type
     );
 }

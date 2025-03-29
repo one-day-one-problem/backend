@@ -13,6 +13,7 @@ import site.haruhana.www.dto.problem.ProblemSummaryDto;
 import site.haruhana.www.entity.problem.Problem;
 import site.haruhana.www.entity.problem.ProblemCategory;
 import site.haruhana.www.entity.problem.ProblemDifficulty;
+import site.haruhana.www.entity.problem.ProblemType;
 import site.haruhana.www.entity.user.User;
 import site.haruhana.www.exception.ProblemNotFoundException;
 import site.haruhana.www.repository.ProblemRepository;
@@ -33,23 +34,25 @@ public class ProblemService {
     /**
      * 문제 목록을 조회하는 메서드
      * <p>
-     * 페이징, 카테고리, 난이도 및 정렬 조건에 따라 문제 목록을 조회합니다.
+     * 페이징, 카테고리, 난이도, 유형 및 정렬 조건에 따라 문제 목록을 조회합니다.
      * 인증된 사용자인 경우 각 문제에 대한 사용자의 정확한 해결 여부도 함께 제공합니다.
      *
      * @param page       페이지 번호
      * @param size       페이지 크기
      * @param category   문제 카테고리 (필터링 조건)
      * @param difficulty 문제 난이도 (필터링 조건)
+     * @param type       문제 유형 (필터링 조건)
      * @param sortType   문제 정렬 기준
      * @param user       현재 사용자 정보 (null인 경우 해결 정보 제외)
      * @return 문제 목록 (페이징 정보 포함)
      */
     @Transactional(readOnly = true)
-    public ProblemPage<ProblemSummaryDto> getProblems(int page, int size, ProblemCategory category, ProblemDifficulty difficulty, ProblemSortType sortType, User user) {
+    public ProblemPage<ProblemSummaryDto> getProblems(int page, int size, ProblemCategory category, ProblemDifficulty difficulty, ProblemType type, ProblemSortType sortType, User user) {
         Page<ProblemSummaryDto> problems = problemRepository.findProblemsWithFilters(
                 PageRequest.of(page, size, sortType.getSort()),
                 category,
-                difficulty
+                difficulty,
+                type
         );
 
         // 인증된 사용자가 있는 경우, 사용자가 해결했는지 여부 확인
