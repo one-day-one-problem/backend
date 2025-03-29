@@ -1,14 +1,14 @@
 package site.haruhana.www.oauth.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import site.haruhana.www.dto.BaseResponse;
+import org.springframework.web.util.UriComponentsBuilder;
 import site.haruhana.www.dto.user.TokenDto;
 import site.haruhana.www.oauth.CustomOAuth2User;
 import site.haruhana.www.utils.JwtUtil;
@@ -26,7 +26,14 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
     private final JwtUtil jwtUtil;
 
-    private final ObjectMapper objectMapper;
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
+
+    @Value("${app.frontend.oauth-callback-path}")
+    private String oauthCallbackPath; // 프론트엔드의 OAuth 콜백 경로
+
+    @Value("${app.frontend.redirect-path}")
+    private String redirectPath; // 프론트엔드의 리다이렉트 경로
 
     /**
      * OAuth2 로그인 성공 시 호출되는 메소드
@@ -38,8 +45,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
      */
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-        // TODO: 추후 로그인 성공에 대한 기획이 명확해지면 수정 필요
-
         // CustomOAuth2User로 타입 변환하여 사용자 정보 추출
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
 
@@ -47,19 +52,29 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             // JWT 토큰 생성
             TokenDto tokenDto = jwtUtil.generateTokens(oAuth2User.getUserId(), oAuth2User.getRole());
 
-            // 성공 응답 생성
-            BaseResponse<TokenDto> baseResponse = BaseResponse.onSuccess("소셜 로그인 성공", tokenDto);
+            // 프론트엔드 OAuth 콜백 페이지로 리다이렉트 URL 생성
+            String targetUrl = UriComponentsBuilder.fromUriString(frontendUrl + oauthCallbackPath)
+                    .queryParam("accessToken", tokenDto.getAccessToken())
+                    .queryParam("refreshToken", tokenDto.getRefreshToken())
+                    .queryParam("redirectTo", redirectPath)
+                    .build()
+                    .toUriString();
 
-            // JSON 형식으로 응답 전송
-            response.setContentType("application/json;charset=UTF-8");
-            response.getWriter().write(objectMapper.writeValueAsString(baseResponse));
+            // 클라이언트 리다이렉트
+            log.info("OAuth2 로그인 성공: 프론트엔드로 리다이렉트 - {}", frontendUrl + oauthCallbackPath);
+            getRedirectStrategy().sendRedirect(request, response, targetUrl);
 
         } catch (Exception e) {
             // 토큰 생성 실패 시 에러 처리
-            log.error("OAuth2 로그인 처리 중 오류 발생: {}", e.getMessage());
-            BaseResponse<?> errorResponse = BaseResponse.onUnauthorized("인증에 실패했습니다.");
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
+            log.error("OAuth2 로그인 처리 중 오류 발생: {}", e.getMessage(), e);
+
+            String failureUrl = UriComponentsBuilder.fromUriString(frontendUrl + "/login")
+                    .queryParam("error", "true")
+                    .queryParam("message", "인증 처리 중 오류가 발생했습니다.")
+                    .build()
+                    .toUriString();
+
+            getRedirectStrategy().sendRedirect(request, response, failureUrl);
         }
     }
 }
