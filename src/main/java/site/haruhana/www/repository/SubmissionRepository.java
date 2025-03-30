@@ -6,7 +6,7 @@ import org.springframework.data.repository.query.Param;
 import site.haruhana.www.entity.submission.Submission;
 import site.haruhana.www.entity.user.User;
 
-import java.util.List;
+import java.util.Set;
 
 public interface SubmissionRepository extends JpaRepository<Submission, Long> {
 
@@ -20,12 +20,12 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
     boolean existsByUserAndProblemIdAndIsCorrectTrue(User user, Long problemId);
 
     /**
-     * 특정 사용자가 해결한 모든 문제 ID 목록을 조회하는 메서드
+     * 특정 사용자가 해결한 모든 문제 ID 집합을 조회하는 메서드
      *
      * @param user 조회할 사용자
-     * @return 사용자가 해결한 문제 ID 목록
+     * @return 사용자가 해결한 문제 ID 집합
      */
     @Query("SELECT DISTINCT s.problem.id FROM Submission s WHERE s.user = :user AND s.isCorrect = true")
-    List<Long> findProblemIdsSolvedCorrectlyByUser(@Param("user") User user);
+    Set<Long> findProblemIdsSolvedCorrectlyByUser(@Param("user") User user);
 
 }
