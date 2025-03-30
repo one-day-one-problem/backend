@@ -39,13 +39,14 @@ public class SubmissionService {
      * 사용자 답안 제출 처리
      *
      * @param user       현재 로그인된 사용자
+     * @param problemId  문제 ID
      * @param requestDto 제출 요청 DTO
      * @return 제출 결과 응답 DTO
      */
     @Transactional
-    public SubmissionResponseDto submitAnswer(User user, SubmissionRequestDto requestDto) {
+    public SubmissionResponseDto submitAnswer(User user, Long problemId, SubmissionRequestDto requestDto) {
         // 문제 조회
-        Problem problem = problemRepository.findById(requestDto.getProblemId())
+        Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(ProblemNotFoundException::new);
 
         // 답안 제출 객체 생성

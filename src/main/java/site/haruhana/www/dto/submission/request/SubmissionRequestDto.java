@@ -15,12 +15,6 @@ import lombok.NoArgsConstructor;
 public class SubmissionRequestDto {
 
     /**
-     * 문제 ID
-     */
-    @NotNull(message = "문제 ID는 필수입니다.")
-    private Long problemId;
-
-    /**
      * 제출한 답안
      * <ul>
      *     <li>객관식: 선택한 옵션 ID들을 콤마(,)로 구분하여 제출</li>
