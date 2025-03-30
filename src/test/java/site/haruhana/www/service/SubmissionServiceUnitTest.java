@@ -91,10 +91,10 @@ class SubmissionServiceUnitTest {
 
             when(submissionRepository.save(any(Submission.class))).thenReturn(savedSubmission);
 
-            SubmissionRequestDto requestDto = new SubmissionRequestDto(1L, "1,3", 120);
+            SubmissionRequestDto requestDto = new SubmissionRequestDto("1,3", 120);
 
             // when: 답안을 제출하면
-            SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, requestDto);
+            SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, 1L, requestDto);
 
             // then: 제출이 정답으로 채점된다
             assertAll(
@@ -123,10 +123,10 @@ class SubmissionServiceUnitTest {
 
             when(submissionRepository.save(any(Submission.class))).thenReturn(savedSubmission);
 
-            SubmissionRequestDto requestDto = new SubmissionRequestDto(1L, "1", 120);
+            SubmissionRequestDto requestDto = new SubmissionRequestDto("1", 120);
 
             // when: 답안을 제출하면
-            SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, requestDto);
+            SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, 1L, requestDto);
 
             // then: 제출이 오답으로 채점된다
             assertAll(
@@ -155,10 +155,10 @@ class SubmissionServiceUnitTest {
 
             when(submissionRepository.save(any(Submission.class))).thenReturn(savedSubmission);
 
-            SubmissionRequestDto requestDto = new SubmissionRequestDto(1L, "1,2,3", 120);
+            SubmissionRequestDto requestDto = new SubmissionRequestDto("1,2,3", 120);
 
             // when: 답안을 제출하면
-            SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, requestDto);
+            SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, 1L, requestDto);
 
             // then: 제출이 오답으로 채점된다
             assertAll(
@@ -187,10 +187,10 @@ class SubmissionServiceUnitTest {
 
             when(submissionRepository.save(any(Submission.class))).thenReturn(savedSubmission);
 
-            SubmissionRequestDto requestDto = new SubmissionRequestDto(1L, "2,4", 120);
+            SubmissionRequestDto requestDto = new SubmissionRequestDto("2,4", 120);
 
             // when: 답안을 제출하면
-            SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, requestDto);
+            SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, 1L, requestDto);
 
             // then: 제출이 오답으로 채점된다
             assertAll(
@@ -219,10 +219,10 @@ class SubmissionServiceUnitTest {
 
             when(submissionRepository.save(any(Submission.class))).thenReturn(savedSubmission);
 
-            SubmissionRequestDto requestDto = new SubmissionRequestDto(1L, "", 120);
+            SubmissionRequestDto requestDto = new SubmissionRequestDto("", 120);
 
             // when: 답안을 제출하면
-            SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, requestDto);
+            SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, 1L, requestDto);
 
             // then: 제출이 오답으로 채점된다
             assertAll(
@@ -256,14 +256,14 @@ class SubmissionServiceUnitTest {
 
             when(submissionRepository.save(any(Submission.class))).thenReturn(savedSubmission);
 
-            SubmissionRequestDto requestDto = new SubmissionRequestDto(2L, "주관식 답안 내용입니다.", 300);
+            SubmissionRequestDto requestDto = new SubmissionRequestDto("주관식 답안 내용입니다.", 300);
 
             // when: 답안을 제출하면
-            SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, requestDto);
+            SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, 2L, requestDto);
 
             // then: 채점 큐에 추가되고 pending 상태로 응답된다
             ArgumentCaptor<GradingData> gradingDataCaptor = ArgumentCaptor.forClass(GradingData.class);
-            
+
             assertAll(
                     "주관식 제출 처리 검증",
                     () -> assertThat(responseDto.getIsPending()).isTrue(),
@@ -287,12 +287,12 @@ class SubmissionServiceUnitTest {
         // given: 존재하지 않는 문제 ID가 주어졌을 때
         when(problemRepository.findById(999L)).thenReturn(Optional.empty());
 
-        SubmissionRequestDto requestDto = new SubmissionRequestDto(999L, "1,2", 60);
+        SubmissionRequestDto requestDto = new SubmissionRequestDto("1,2", 60);
 
         // when & then: 제출 시 예외가 발생한다
         assertAll(
                 "존재하지 않는 문제 제출 검증",
-                () -> assertThrows(ProblemNotFoundException.class, () -> submissionService.submitAnswer(testUser, requestDto)),
+                () -> assertThrows(ProblemNotFoundException.class, () -> submissionService.submitAnswer(testUser, 999L, requestDto)),
                 () -> verify(submissionRepository, never()).save(any(Submission.class))
         );
     }
@@ -315,10 +315,10 @@ class SubmissionServiceUnitTest {
 
         when(submissionRepository.save(any(Submission.class))).thenReturn(savedSubmission);
 
-        SubmissionRequestDto requestDto = new SubmissionRequestDto(1L, "1,3", 120);
+        SubmissionRequestDto requestDto = new SubmissionRequestDto("1,3", 120);
 
         // when: 답안을 제출하면
-        submissionService.submitAnswer(testUser, requestDto);
+        submissionService.submitAnswer(testUser, 1L, requestDto);
 
         // then: 문제 풀이 수가 증가한다
         assertThat(multipleChoiceProblem.getSolvedCount()).isEqualTo(1);
