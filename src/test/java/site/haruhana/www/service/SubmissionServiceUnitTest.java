@@ -366,7 +366,6 @@ class SubmissionServiceUnitTest {
                 .category(ProblemCategory.SPRING_AOP)
                 .difficulty(ProblemDifficulty.HARD)
                 .provider(ProblemProvider.AI)
-                .expectedAnswerLength("300-500자")
                 .sampleAnswer("AOP는 관점 지향 프로그래밍으로, 핵심 비즈니스 로직과 공통 관심사(로깅, 트랜잭션 등)를 분리하여 모듈화하는 프로그래밍 패러다임입니다. 스프링에서는 프록시 기반으로 구현되며, @Aspect, @Before, @After 등의 어노테이션을 활용합니다...")
                 .build();
 
