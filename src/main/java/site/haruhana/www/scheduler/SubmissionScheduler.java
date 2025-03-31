@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import site.haruhana.www.entity.submission.Submission;
+import site.haruhana.www.entity.submission.subjective.SubjectiveSubmission;
 import site.haruhana.www.exception.SubmissionNotFoundException;
 import site.haruhana.www.queue.SubmissionMessageQueue;
 import site.haruhana.www.queue.message.GradingData;
@@ -56,9 +57,14 @@ public class SubmissionScheduler {
             // 제출물 조회
             Submission submission = submissionRepository.findById(gradingData.getSubmissionId())
                     .orElseThrow(SubmissionNotFoundException::new);
-
+            
+            if (!(submission instanceof SubjectiveSubmission subjectiveSubmission)) {
+                log.error("#{}번 제출은 주관식 제출이 아닙니다.", gradingData.getSubmissionId());
+                return;
+            }
+            
             // 채점 결과 업데이트
-            submission.updateSubjectiveGradingResult(result);
+            subjectiveSubmission.updateGradingResult(result);
 
             // 정답인 경우, 문제 풀이 카운트 증가
             if (result.isCorrect()) {
@@ -69,7 +75,7 @@ public class SubmissionScheduler {
                         });
             }
 
-            submissionRepository.save(submission);
+            submissionRepository.save(subjectiveSubmission);
 
             log.info("주관식 문제 제출 #{} 채점 완료: {}점 (정답 여부: {}) / 남은 채점 대기 수: {}", gradingData.getSubmissionId(), result.score(), result.isCorrect(), messageQueue.size());
 

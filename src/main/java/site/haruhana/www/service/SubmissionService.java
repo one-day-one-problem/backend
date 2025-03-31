@@ -10,6 +10,8 @@ import site.haruhana.www.entity.problem.Problem;
 import site.haruhana.www.entity.problem.ProblemType;
 import site.haruhana.www.entity.problem.choice.ProblemOption;
 import site.haruhana.www.entity.submission.Submission;
+import site.haruhana.www.entity.submission.choice.MultipleChoiceSubmission;
+import site.haruhana.www.entity.submission.subjective.SubjectiveSubmission;
 import site.haruhana.www.entity.user.User;
 import site.haruhana.www.exception.InvalidAnswerFormatException;
 import site.haruhana.www.exception.ProblemNotFoundException;
@@ -18,7 +20,6 @@ import site.haruhana.www.queue.message.GradingData;
 import site.haruhana.www.repository.ProblemRepository;
 import site.haruhana.www.repository.SubmissionRepository;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
@@ -50,28 +51,24 @@ public class SubmissionService {
                 .orElseThrow(ProblemNotFoundException::new);
 
         // 답안 제출 객체 생성
-        Submission submission = Submission.builder()
-                .user(user)
-                .problem(problem)
-                .submittedAt(LocalDateTime.now())
-                .duration(requestDto.getDuration())
-                .submittedAnswer(requestDto.getAnswer())
-                .build();
+        Submission submission = Submission.from(user, problem, requestDto.getAnswer(), requestDto.getDuration());
 
         // 제출 저장 (ID 부여를 위해 먼저 저장)
         submission = submissionRepository.save(submission);
 
         // 문제 유형에 따라 처리
         if (problem.getType() == ProblemType.MULTIPLE_CHOICE) { // 객관식 문제인 경우
-            boolean isCorrect = gradeMultipleChoiceSubmission(submission); // 문제를 채점하고
-            submission.updateMultipleChoiceGradingResult(isCorrect); // 정답 여부 업데이트
+            MultipleChoiceSubmission multipleChoiceSubmission = (MultipleChoiceSubmission) submission;
+            boolean isCorrect = gradeMultipleChoiceSubmission(multipleChoiceSubmission); // 문제를 채점하고
+            multipleChoiceSubmission.updateGradingResult(isCorrect); // 정답 여부 업데이트
 
             if (isCorrect) { // 사용자가 정답을 맞췄다면
                 problem.incrementSolvedCount(); // 문제 풀이 횟수 증가
             }
 
         } else { // 주관식 문제인 경우
-            messageQueue.enqueue(GradingData.fromSubmission(submission)); // 채점 대기 큐에 추가
+            SubjectiveSubmission subjectiveSubmission = (SubjectiveSubmission) submission;
+            messageQueue.enqueue(GradingData.fromSubmission(subjectiveSubmission));
         }
 
         // 응답 생성 및 반환
@@ -84,7 +81,7 @@ public class SubmissionService {
      * @param submission 채점할 제출 내역
      * @return 채점 결과 (true: 정답, false: 오답)
      */
-    private boolean gradeMultipleChoiceSubmission(Submission submission) {
+    private boolean gradeMultipleChoiceSubmission(MultipleChoiceSubmission submission) {
         // 제출 정보에서 필요한 데이터 가져오기
         Problem problem = submission.getProblem();
         String submittedAnswer = submission.getSubmittedAnswer();

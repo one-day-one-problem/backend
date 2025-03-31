@@ -3,7 +3,7 @@ package site.haruhana.www.queue.message;
 import lombok.Builder;
 import lombok.Getter;
 import site.haruhana.www.entity.problem.Problem;
-import site.haruhana.www.entity.submission.Submission;
+import site.haruhana.www.entity.submission.subjective.SubjectiveSubmission;
 
 import java.util.List;
 
@@ -38,20 +38,20 @@ public class GradingData {
     /**
      * Submission 엔티티에서 GradingData 객체를 생성하는 팩토리 메서드
      *
-     * @param submission 채점할 제출 정보
+     * @param subjectiveSubmission 채점할 주관식 답안 제출 정보
      * @return 채점에 필요한 데이터만 포함하는 GradingData 객체
      */
-    public static GradingData fromSubmission(Submission submission) {
-        Problem problem = submission.getProblem();
+    public static GradingData fromSubmission(SubjectiveSubmission subjectiveSubmission) {
+        Problem problem = subjectiveSubmission.getProblem();
 
         return GradingData.builder()
-                .submissionId(submission.getId())
+                .submissionId(subjectiveSubmission.getId())
                 .problemId(problem.getId())
                 .problemTitle(problem.getTitle())
                 .problemQuestion(problem.getQuestion())
                 .gradingCriteria(problem.getGradingCriteriaList())
                 .sampleAnswer(problem.getSampleAnswer())
-                .submittedAnswer(submission.getSubmittedAnswer())
+                .submittedAnswer(subjectiveSubmission.getSubmittedAnswer())
                 .build();
     }
 }

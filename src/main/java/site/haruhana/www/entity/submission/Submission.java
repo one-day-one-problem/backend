@@ -1,24 +1,25 @@
 package site.haruhana.www.entity.submission;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.CreatedDate;
 import site.haruhana.www.entity.problem.Problem;
+import site.haruhana.www.entity.submission.choice.MultipleChoiceSubmission;
+import site.haruhana.www.entity.submission.subjective.SubjectiveSubmission;
 import site.haruhana.www.entity.user.User;
-import site.haruhana.www.service.AIService.GradingResult;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Builder
+@SuperBuilder
 @NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "submissions")
-public class Submission {
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "submission_type", discriminatorType = DiscriminatorType.STRING)
+public abstract class Submission {
 
     /**
      * 제출 ID
@@ -58,7 +59,7 @@ public class Submission {
      * 사용자가 제출한 답안
      */
     @Column(columnDefinition = "TEXT", nullable = false)
-    private String submittedAnswer; // 객관식인 경우에도 String으로 저장. 복수 정답인 경우 콤마(,)로 구분
+    private String submittedAnswer;
 
     /**
      * 사용자가 제출한 답안의 정답 여부
@@ -67,40 +68,38 @@ public class Submission {
     private Boolean isCorrect;
 
     /**
-     * (주관식) 사용자가 제출한 답안에 대한 점수
+     * 제출 타입에 따른 엔티티 생성 팩토리 메서드
      */
-    private Double score;
-
-    /**
-     * (주관식) 사용자가 제출한 답안에 대한 피드백 (by AI)
-     */
-    @Column(columnDefinition = "TEXT")
-    private String feedback;
-
-    /**
-     * (주관식) 피드백이 제공된 시각
-     */
-    private LocalDateTime feedbackProvidedAt;
-
-    /**
-     * 주관식 문제 답안의 채점 결과를 업데이트하는 메서드
-     *
-     * @param result 채점 결과
-     */
-    public void updateSubjectiveGradingResult(GradingResult result) {
-        this.score = result.score();
-        this.isCorrect = result.isCorrect();
-        this.feedback = result.feedback();
-        this.feedbackProvidedAt = LocalDateTime.now();
+    public static Submission from(User user, Problem problem, String submittedAnswer, int duration) {
+        return switch (problem.getType()) {
+            case MULTIPLE_CHOICE -> MultipleChoiceSubmission.builder()
+                    .user(user)
+                    .problem(problem)
+                    .submittedAt(LocalDateTime.now())
+                    .duration(duration)
+                    .submittedAnswer(submittedAnswer)
+                    .build();
+            case SUBJECTIVE -> SubjectiveSubmission.builder()
+                    .user(user)
+                    .problem(problem)
+                    .submittedAt(LocalDateTime.now())
+                    .duration(duration)
+                    .submittedAnswer(submittedAnswer)
+                    .build();
+        };
     }
 
     /**
-     * 객관식 문제의 정답 여부를 설정하는 메서드
-     *
-     * @param isCorrect 정답 여부
+     * 정답 여부 확인 메소드 (모든 타입의 제출에서 공통으로 사용됨)
      */
-    public void updateMultipleChoiceGradingResult(boolean isCorrect) {
+    public Boolean getIsCorrect() {
+        return this.isCorrect;
+    }
+
+    /**
+     * 정답 여부 설정 메소드
+     */
+    protected void setIsCorrect(Boolean isCorrect) {
         this.isCorrect = isCorrect;
     }
-
 }
