@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.http.HttpMethod;
 import site.haruhana.www.config.security.filter.JwtAuthenticationFilter;
 import site.haruhana.www.config.security.handler.CustomAccessDeniedHandler;
 import site.haruhana.www.config.security.handler.CustomAuthenticationEntryPoint;
@@ -35,7 +36,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/actuator/health").permitAll() // 로드밸런서 대상그룹 Health Check를 위해 허용
                         .requestMatchers("/api/problems/**").permitAll() // 문제 관련 API는 인증이 필수가 아님
-                        .requestMatchers("/api/submissions/**").authenticated() // 답안 제출 관련 API는 인증 필수
+                        .requestMatchers(HttpMethod.POST, "/api/problems/*/submissions").authenticated() // 답안 제출 관련 API는 인증 필수
                         .anyRequest().authenticated() // 그 외의 API는 인증 필수
                 )
                 .oauth2Login(oAuth2LoginConfigurer -> oAuth2LoginConfigurer
