@@ -1,54 +1,28 @@
 package site.haruhana.www.dto.submission.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Builder;
 import lombok.Getter;
+import site.haruhana.www.dto.submission.response.extend.MultipleChoiceSubmissionResponseDto;
+import site.haruhana.www.dto.submission.response.extend.SubjectiveSubmissionResponseDto;
 import site.haruhana.www.entity.submission.Submission;
 
 import java.time.LocalDateTime;
 
 @Getter
-@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SubmissionResponseDto {
+public abstract class SubmissionResponseDto {
+    private final Long id;
+    private final LocalDateTime submittedAt;
 
-    private Long id;
-    private LocalDateTime submittedAt;
-
-    // 객관식 문제 전용 필드
-    private Boolean isCorrect;
-
-    // 주관식 문제 전용 필드
-    private Double score;
-    private String feedback;
-    private LocalDateTime feedbackProvidedAt;
-    private Boolean isPending;  // 채점 대기중 여부
-
-    /**
-     * 객관식 문제 제출에 대한 응답 DTO 생성하는 정적 팩토리 메서드
-     */
-    public static SubmissionResponseDto fromMultipleChoice(Submission submission) {
-        return SubmissionResponseDto.builder()
-                .id(submission.getId())
-                .submittedAt(submission.getSubmittedAt())
-                .isCorrect(submission.getIsCorrect())
-                .build();
+    protected SubmissionResponseDto(Long id, LocalDateTime submittedAt) {
+        this.id = id;
+        this.submittedAt = submittedAt;
     }
 
-    /**
-     * 주관식 문제 제출에 대한 응답 DTO 생성하는 정적 팩토리 메서드
-     */
-    public static SubmissionResponseDto fromSubjective(Submission submission) {
-        boolean isPending = submission.getFeedback() == null;
-
-        return SubmissionResponseDto.builder()
-                .id(submission.getId())
-                .submittedAt(submission.getSubmittedAt())
-                .score(submission.getScore())
-                .feedback(submission.getFeedback())
-                .feedbackProvidedAt(submission.getFeedbackProvidedAt())
-                .isPending(isPending)
-                .build();
+    public static SubmissionResponseDto fromSubmission(Submission submission) {
+        return switch (submission.getProblem().getType()) {
+            case MULTIPLE_CHOICE -> new MultipleChoiceSubmissionResponseDto(submission);
+            case SUBJECTIVE -> new SubjectiveSubmissionResponseDto(submission);
+        };
     }
-
 }
