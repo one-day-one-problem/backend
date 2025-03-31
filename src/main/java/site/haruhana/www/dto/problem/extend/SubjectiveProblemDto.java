@@ -8,10 +8,8 @@ import site.haruhana.www.entity.problem.Problem;
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SubjectiveProblemDto extends ProblemDto {
-    private final String expectedAnswerLength;
 
     public SubjectiveProblemDto(Problem problem, Boolean isSolved) {
         super(problem, isSolved);
-        this.expectedAnswerLength = problem.getExpectedAnswerLength();
     }
 }
