@@ -75,10 +75,7 @@ public class SubmissionService {
         }
 
         // 응답 생성 및 반환
-        return switch (problem.getType()) {
-            case MULTIPLE_CHOICE -> SubmissionResponseDto.fromMultipleChoice(submission);
-            case SUBJECTIVE -> SubmissionResponseDto.fromSubjective(submission);
-        };
+        return SubmissionResponseDto.fromSubmission(submission);
     }
 
     /**

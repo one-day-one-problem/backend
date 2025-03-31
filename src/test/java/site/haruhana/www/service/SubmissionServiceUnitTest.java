@@ -10,6 +10,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import site.haruhana.www.dto.submission.request.SubmissionRequestDto;
+import site.haruhana.www.dto.submission.response.extend.MultipleChoiceSubmissionResponseDto;
+import site.haruhana.www.dto.submission.response.extend.SubjectiveSubmissionResponseDto;
 import site.haruhana.www.dto.submission.response.SubmissionResponseDto;
 import site.haruhana.www.entity.problem.Problem;
 import site.haruhana.www.entity.problem.ProblemCategory;
@@ -97,11 +99,12 @@ class SubmissionServiceUnitTest {
             SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, 1L, requestDto);
 
             // then: 제출이 정답으로 채점된다
+            var multipleChoiceResponse = assertInstanceOf(MultipleChoiceSubmissionResponseDto.class, responseDto);
             assertAll(
                     "정답 제출 검증",
-                    () -> assertThat(responseDto.getIsCorrect()).isTrue(),
+                    () -> assertThat(multipleChoiceResponse.getIsCorrect()).isTrue(),
                     () -> verify(submissionRepository, times(1)).save(any(Submission.class)),
-                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class)) // 주관식 문제 채점 큐에 추가되지 않음
+                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class))
             );
         }
 
@@ -129,11 +132,12 @@ class SubmissionServiceUnitTest {
             SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, 1L, requestDto);
 
             // then: 제출이 오답으로 채점된다
+            var multipleChoiceResponse = assertInstanceOf(MultipleChoiceSubmissionResponseDto.class, responseDto);
             assertAll(
                     "부분 정답 제출 검증",
-                    () -> assertThat(responseDto.getIsCorrect()).isFalse(),
+                    () -> assertThat(multipleChoiceResponse.getIsCorrect()).isFalse(),
                     () -> verify(submissionRepository, times(1)).save(any(Submission.class)),
-                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class)) // 주관식 문제 채점 큐에 추가되지 않음
+                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class))
             );
         }
 
@@ -161,11 +165,12 @@ class SubmissionServiceUnitTest {
             SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, 1L, requestDto);
 
             // then: 제출이 오답으로 채점된다
+            var multipleChoiceResponse = assertInstanceOf(MultipleChoiceSubmissionResponseDto.class, responseDto);
             assertAll(
                     "정답+오답 혼합 제출 검증",
-                    () -> assertThat(responseDto.getIsCorrect()).isFalse(),
+                    () -> assertThat(multipleChoiceResponse.getIsCorrect()).isFalse(),
                     () -> verify(submissionRepository, times(1)).save(any(Submission.class)),
-                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class)) // 주관식 문제 채점 큐에 추가되지 않음
+                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class))
             );
         }
 
@@ -193,11 +198,12 @@ class SubmissionServiceUnitTest {
             SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, 1L, requestDto);
 
             // then: 제출이 오답으로 채점된다
+            var multipleChoiceResponse = assertInstanceOf(MultipleChoiceSubmissionResponseDto.class, responseDto);
             assertAll(
                     "오답 제출 검증",
-                    () -> assertThat(responseDto.getIsCorrect()).isFalse(),
+                    () -> assertThat(multipleChoiceResponse.getIsCorrect()).isFalse(),
                     () -> verify(submissionRepository, times(1)).save(any(Submission.class)),
-                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class)) // 주관식 문제 채점 큐에 추가되지 않음
+                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class))
             );
         }
 
@@ -225,12 +231,13 @@ class SubmissionServiceUnitTest {
             SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, 1L, requestDto);
 
             // then: 제출이 오답으로 채점된다
+            var multipleChoiceResponse = assertInstanceOf(MultipleChoiceSubmissionResponseDto.class, responseDto);
             assertAll(
                     "빈 답안 제출 검증",
-                    () -> assertThat(responseDto.getIsCorrect()).isFalse(),
+                    () -> assertThat(multipleChoiceResponse.getIsCorrect()).isFalse(),
                     () -> assertThat(responseDto.getId()).isEqualTo(1L),
                     () -> verify(submissionRepository, times(1)).save(any(Submission.class)),
-                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class)) // 주관식 문제 채점 큐에 추가되지 않음
+                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class))
             );
         }
     }
@@ -263,12 +270,13 @@ class SubmissionServiceUnitTest {
 
             // then: 채점 큐에 추가되고 pending 상태로 응답된다
             ArgumentCaptor<GradingData> gradingDataCaptor = ArgumentCaptor.forClass(GradingData.class);
+            var subjectiveResponse = assertInstanceOf(SubjectiveSubmissionResponseDto.class, responseDto);
 
             assertAll(
                     "주관식 제출 처리 검증",
-                    () -> assertThat(responseDto.getIsPending()).isTrue(),
-                    () -> assertThat(responseDto.getFeedback()).isNull(),
-                    () -> assertThat(responseDto.getScore()).isNull(),
+                    () -> assertThat(subjectiveResponse.getIsPending()).isTrue(),
+                    () -> assertThat(subjectiveResponse.getFeedback()).isNull(),
+                    () -> assertThat(subjectiveResponse.getScore()).isNull(),
                     () -> verify(messageQueue, times(1)).enqueue(gradingDataCaptor.capture()),
                     () -> {
                         GradingData capturedData = gradingDataCaptor.getValue();
