@@ -60,13 +60,18 @@ public class SubmissionScheduler {
             // 채점 결과 업데이트
             submission.updateSubjectiveGradingResult(result);
 
-            // 정답인 경우, 문제 풀이 카운트 증가
-            if (result.isCorrect()) {
-                problemRepository.findById(gradingData.getProblemId())
-                        .ifPresent(problem -> {
-                            problem.incrementSolvedCount();
-                            problemRepository.save(problem);
-                        });
+            if (result.isCorrect()) { // 해당 제출물이 정답인 경우
+                // 사용자가 해당 문제를 이전에 해결한 적이 있는지 확인
+                boolean alreadySolvedByUser = submissionRepository.existsByUserAndProblemIdAndIsCorrectTrue(submission.getUser(), gradingData.getProblemId());
+
+                // 문제를 처음 맞춘 경우에만 문제 풀이 횟수 증가
+                if (!alreadySolvedByUser) {
+                    problemRepository.findById(gradingData.getProblemId())
+                            .ifPresent(problem -> {
+                                problem.incrementSolvedCount();
+                                problemRepository.save(problem);
+                            });
+                }
             }
 
             submissionRepository.save(submission);

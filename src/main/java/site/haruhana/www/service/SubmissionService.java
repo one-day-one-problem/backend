@@ -67,7 +67,13 @@ public class SubmissionService {
             submission.updateMultipleChoiceGradingResult(isCorrect); // 정답 여부 업데이트
 
             if (isCorrect) { // 사용자가 정답을 맞췄다면
-                problem.incrementSolvedCount(); // 문제 풀이 횟수 증가
+                // 사용자가 해당 문제를 이전에 해결한 적이 있는지 확인
+                boolean alreadySolvedByUser = submissionRepository.existsByUserAndProblemIdAndIsCorrectTrue(user, problemId);
+
+                // 문제를 처음 맞춘 경우에만 문제 풀이 횟수 증가
+                if (!alreadySolvedByUser) {
+                    problem.incrementSolvedCount();
+                }
             }
 
         } else { // 주관식 문제인 경우
