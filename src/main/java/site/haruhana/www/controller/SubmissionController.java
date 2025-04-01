@@ -1,6 +1,7 @@
 package site.haruhana.www.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -28,7 +29,7 @@ public class SubmissionController {
      */
     @PostMapping("/problems/{problemId}/submissions")
     public ResponseEntity<BaseResponse<SubmissionResponseDto>> submitAnswer(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal @NotNull User user,
             @PathVariable("problemId") Long problemId,
             @Valid @RequestBody SubmissionRequestDto requestDto
     ) {
