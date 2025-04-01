@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable) // Rest API 사용으로 CSRF 비활성화.
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/actuator/health").permitAll() // 로드밸런서 대상그룹 Health Check를 위해 허용
+                        .requestMatchers("/api/auth/refresh").permitAll() // 토큰 갱신 API는 인증이 필요없음
                         .requestMatchers("/api/problems/**").permitAll() // 문제 관련 API는 인증이 필수가 아님
                         .requestMatchers(HttpMethod.POST, "/api/problems/*/submissions").authenticated() // 답안 제출 관련 API는 인증 필수
                         .anyRequest().authenticated() // 그 외의 API는 인증 필수
