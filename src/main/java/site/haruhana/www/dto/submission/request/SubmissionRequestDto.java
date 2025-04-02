@@ -28,7 +28,7 @@ public class SubmissionRequestDto {
      * 문제 풀이에 소요된 시간(초)
      */
     @NotNull(message = "소요 시간은 필수입니다.")
-    @Min(value = 1, message = "소요 시간은 1초 이상이어야 합니다.")
+    @Min(value = 0, message = "소요 시간은 0초 이상이어야 합니다.")
     private Integer duration;
 
 }
