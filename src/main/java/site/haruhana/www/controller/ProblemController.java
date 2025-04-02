@@ -12,6 +12,7 @@ import site.haruhana.www.dto.problem.ProblemSortType;
 import site.haruhana.www.dto.problem.ProblemSummaryDto;
 import site.haruhana.www.entity.problem.ProblemCategory;
 import site.haruhana.www.entity.problem.ProblemDifficulty;
+import site.haruhana.www.entity.problem.ProblemType;
 import site.haruhana.www.entity.user.User;
 import site.haruhana.www.service.ProblemService;
 
@@ -25,15 +26,18 @@ public class ProblemController {
     /**
      * 문제 목록 조회 API
      * <p>
-     * 페이징, 카테고리, 난이도 및 정렬 조건에 따라 문제 목록을 조회합니다.
+     * 페이징, 카테고리, 난이도, 유형 및 정렬 조건에 따라 문제 목록을 조회합니다.
      * 로그인한 사용자가 요청한 경우 각 문제에 대한 사용자의 해결 여부도 함께 제공합니다.
+     * 미해결 문제만 보기 옵션으로 사용자가 풀지 않은 문제만 필터링할 수 있습니다.
      *
-     * @param page       페이지 번호 (기본값: 0)
-     * @param size       페이지 크기 (기본값: 12)
-     * @param category   문제 카테고리 (선택 사항)
-     * @param difficulty 문제 난이도 (선택 사항)
-     * @param sortType   문제 정렬 기준 (기본값: 가장 많이 푼 문제)
-     * @param user       현재 인증된 사용자 (인증되지 않은 경우 null)
+     * @param page         페이지 번호 (기본값: 0)
+     * @param size         페이지 크기 (기본값: 12)
+     * @param category     문제 카테고리 (선택 사항)
+     * @param difficulty   문제 난이도 (선택 사항)
+     * @param type         문제 유형 (선택 사항)
+     * @param sortType     문제 정렬 기준 (기본값: 가장 많이 푼 문제)
+     * @param onlyUnsolved 미해결 문제만 보기 (기본값: false)
+     * @param user         현재 인증된 사용자 (인증되지 않은 경우 null)
      * @return 문제 목록 응답
      */
     @GetMapping
@@ -42,10 +46,12 @@ public class ProblemController {
             @RequestParam(defaultValue = "12") @Min(1) int size,
             @RequestParam(required = false) ProblemCategory category,
             @RequestParam(required = false) ProblemDifficulty difficulty,
+            @RequestParam(required = false) ProblemType type,
             @RequestParam(defaultValue = "MOST_SOLVED") ProblemSortType sortType,
+            @RequestParam(defaultValue = "false") boolean onlyUnsolved,
             @AuthenticationPrincipal User user
     ) {
-        ProblemPage<ProblemSummaryDto> data = problemService.getProblems(page, size, category, difficulty, sortType, user);
+        ProblemPage<ProblemSummaryDto> data = problemService.getProblems(page, size, category, difficulty, type, sortType, onlyUnsolved, user);
         return ResponseEntity.ok(BaseResponse.onSuccess("문제 목록을 조회하는데 성공했습니다.", data));
     }
 

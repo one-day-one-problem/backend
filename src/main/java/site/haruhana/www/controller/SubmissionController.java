@@ -1,13 +1,11 @@
 package site.haruhana.www.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import site.haruhana.www.dto.BaseResponse;
 import site.haruhana.www.dto.submission.request.SubmissionRequestDto;
 import site.haruhana.www.dto.submission.response.SubmissionResponseDto;
@@ -16,7 +14,7 @@ import site.haruhana.www.service.SubmissionService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/submissions")
+@RequestMapping("/api")
 public class SubmissionController {
 
     private final SubmissionService submissionService;
@@ -24,16 +22,18 @@ public class SubmissionController {
     /**
      * 문제 답안 제출 API
      *
+     * @param problemId  문제 ID (URL 경로 변수)
      * @param user       현재 인증된 사용자
      * @param requestDto 제출 요청 정보
      * @return 제출 결과 정보
      */
-    @PostMapping
+    @PostMapping("/problems/{problemId}/submissions")
     public ResponseEntity<BaseResponse<SubmissionResponseDto>> submitAnswer(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal @NotNull User user,
+            @PathVariable("problemId") Long problemId,
             @Valid @RequestBody SubmissionRequestDto requestDto
     ) {
-        SubmissionResponseDto data = submissionService.submitAnswer(user, requestDto);
+        SubmissionResponseDto data = submissionService.submitAnswer(user, problemId, requestDto);
         return ResponseEntity.ok(BaseResponse.onSuccess("답안이 제출되었습니다.", data));
     }
 }

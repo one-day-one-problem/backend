@@ -101,11 +101,6 @@ public class Problem extends BaseTimeEntity {
     private List<GradingCriteria> gradingCriteria = new ArrayList<>();
 
     /**
-     * (주관식) 예상 답안 길이
-     */
-    private String expectedAnswerLength;
-
-    /**
      * (주관식) 예시 답안
      */
     @Column(columnDefinition = "TEXT")
@@ -126,7 +121,7 @@ public class Problem extends BaseTimeEntity {
     }
 
     @Builder(builderClassName = "SubjectiveProblemBuilder")
-    private Problem(String title, String question, ProblemCategory category, ProblemDifficulty difficulty, ProblemProvider provider, String expectedAnswerLength, String sampleAnswer) {
+    private Problem(String title, String question, ProblemCategory category, ProblemDifficulty difficulty, ProblemProvider provider, String sampleAnswer) {
         this.title = title;
         this.question = question;
         this.category = category;
@@ -137,7 +132,6 @@ public class Problem extends BaseTimeEntity {
         this.solvedCount = 0;
         this.feedbacks = new ArrayList<>();
         this.gradingCriteria = new ArrayList<>();
-        this.expectedAnswerLength = expectedAnswerLength;
         this.sampleAnswer = sampleAnswer;
     }
 

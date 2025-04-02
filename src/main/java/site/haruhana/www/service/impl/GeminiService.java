@@ -78,7 +78,6 @@ public class GeminiService implements AIService {
             Problem problem = Problem.subjectiveProblemBuilder()
                     .title(json.get("title").asText())
                     .question(json.get("question").asText())
-                    .expectedAnswerLength(json.get("expectedLength").asText())
                     .category(category)
                     .difficulty(difficulty)
                     .provider(ProblemProvider.AI)

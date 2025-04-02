@@ -10,6 +10,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import site.haruhana.www.dto.submission.request.SubmissionRequestDto;
+import site.haruhana.www.dto.submission.response.extend.MultipleChoiceSubmissionResponseDto;
+import site.haruhana.www.dto.submission.response.extend.SubjectiveSubmissionResponseDto;
 import site.haruhana.www.dto.submission.response.SubmissionResponseDto;
 import site.haruhana.www.entity.problem.Problem;
 import site.haruhana.www.entity.problem.ProblemCategory;
@@ -91,17 +93,18 @@ class SubmissionServiceUnitTest {
 
             when(submissionRepository.save(any(Submission.class))).thenReturn(savedSubmission);
 
-            SubmissionRequestDto requestDto = new SubmissionRequestDto(1L, "1,3", 120);
+            SubmissionRequestDto requestDto = new SubmissionRequestDto("1,3", 120);
 
             // when: 답안을 제출하면
-            SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, requestDto);
+            SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, 1L, requestDto);
 
             // then: 제출이 정답으로 채점된다
+            var multipleChoiceResponse = assertInstanceOf(MultipleChoiceSubmissionResponseDto.class, responseDto);
             assertAll(
                     "정답 제출 검증",
-                    () -> assertThat(responseDto.getIsCorrect()).isTrue(),
+                    () -> assertThat(multipleChoiceResponse.getIsCorrect()).isTrue(),
                     () -> verify(submissionRepository, times(1)).save(any(Submission.class)),
-                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class)) // 주관식 문제 채점 큐에 추가되지 않음
+                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class))
             );
         }
 
@@ -123,17 +126,18 @@ class SubmissionServiceUnitTest {
 
             when(submissionRepository.save(any(Submission.class))).thenReturn(savedSubmission);
 
-            SubmissionRequestDto requestDto = new SubmissionRequestDto(1L, "1", 120);
+            SubmissionRequestDto requestDto = new SubmissionRequestDto("1", 120);
 
             // when: 답안을 제출하면
-            SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, requestDto);
+            SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, 1L, requestDto);
 
             // then: 제출이 오답으로 채점된다
+            var multipleChoiceResponse = assertInstanceOf(MultipleChoiceSubmissionResponseDto.class, responseDto);
             assertAll(
                     "부분 정답 제출 검증",
-                    () -> assertThat(responseDto.getIsCorrect()).isFalse(),
+                    () -> assertThat(multipleChoiceResponse.getIsCorrect()).isFalse(),
                     () -> verify(submissionRepository, times(1)).save(any(Submission.class)),
-                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class)) // 주관식 문제 채점 큐에 추가되지 않음
+                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class))
             );
         }
 
@@ -155,17 +159,18 @@ class SubmissionServiceUnitTest {
 
             when(submissionRepository.save(any(Submission.class))).thenReturn(savedSubmission);
 
-            SubmissionRequestDto requestDto = new SubmissionRequestDto(1L, "1,2,3", 120);
+            SubmissionRequestDto requestDto = new SubmissionRequestDto("1,2,3", 120);
 
             // when: 답안을 제출하면
-            SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, requestDto);
+            SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, 1L, requestDto);
 
             // then: 제출이 오답으로 채점된다
+            var multipleChoiceResponse = assertInstanceOf(MultipleChoiceSubmissionResponseDto.class, responseDto);
             assertAll(
                     "정답+오답 혼합 제출 검증",
-                    () -> assertThat(responseDto.getIsCorrect()).isFalse(),
+                    () -> assertThat(multipleChoiceResponse.getIsCorrect()).isFalse(),
                     () -> verify(submissionRepository, times(1)).save(any(Submission.class)),
-                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class)) // 주관식 문제 채점 큐에 추가되지 않음
+                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class))
             );
         }
 
@@ -187,17 +192,18 @@ class SubmissionServiceUnitTest {
 
             when(submissionRepository.save(any(Submission.class))).thenReturn(savedSubmission);
 
-            SubmissionRequestDto requestDto = new SubmissionRequestDto(1L, "2,4", 120);
+            SubmissionRequestDto requestDto = new SubmissionRequestDto("2,4", 120);
 
             // when: 답안을 제출하면
-            SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, requestDto);
+            SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, 1L, requestDto);
 
             // then: 제출이 오답으로 채점된다
+            var multipleChoiceResponse = assertInstanceOf(MultipleChoiceSubmissionResponseDto.class, responseDto);
             assertAll(
                     "오답 제출 검증",
-                    () -> assertThat(responseDto.getIsCorrect()).isFalse(),
+                    () -> assertThat(multipleChoiceResponse.getIsCorrect()).isFalse(),
                     () -> verify(submissionRepository, times(1)).save(any(Submission.class)),
-                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class)) // 주관식 문제 채점 큐에 추가되지 않음
+                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class))
             );
         }
 
@@ -219,18 +225,19 @@ class SubmissionServiceUnitTest {
 
             when(submissionRepository.save(any(Submission.class))).thenReturn(savedSubmission);
 
-            SubmissionRequestDto requestDto = new SubmissionRequestDto(1L, "", 120);
+            SubmissionRequestDto requestDto = new SubmissionRequestDto("", 120);
 
             // when: 답안을 제출하면
-            SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, requestDto);
+            SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, 1L, requestDto);
 
             // then: 제출이 오답으로 채점된다
+            var multipleChoiceResponse = assertInstanceOf(MultipleChoiceSubmissionResponseDto.class, responseDto);
             assertAll(
                     "빈 답안 제출 검증",
-                    () -> assertThat(responseDto.getIsCorrect()).isFalse(),
+                    () -> assertThat(multipleChoiceResponse.getIsCorrect()).isFalse(),
                     () -> assertThat(responseDto.getId()).isEqualTo(1L),
                     () -> verify(submissionRepository, times(1)).save(any(Submission.class)),
-                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class)) // 주관식 문제 채점 큐에 추가되지 않음
+                    () -> verify(messageQueue, never()).enqueue(any(GradingData.class))
             );
         }
     }
@@ -256,19 +263,20 @@ class SubmissionServiceUnitTest {
 
             when(submissionRepository.save(any(Submission.class))).thenReturn(savedSubmission);
 
-            SubmissionRequestDto requestDto = new SubmissionRequestDto(2L, "주관식 답안 내용입니다.", 300);
+            SubmissionRequestDto requestDto = new SubmissionRequestDto("주관식 답안 내용입니다.", 300);
 
             // when: 답안을 제출하면
-            SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, requestDto);
+            SubmissionResponseDto responseDto = submissionService.submitAnswer(testUser, 2L, requestDto);
 
             // then: 채점 큐에 추가되고 pending 상태로 응답된다
             ArgumentCaptor<GradingData> gradingDataCaptor = ArgumentCaptor.forClass(GradingData.class);
-            
+            var subjectiveResponse = assertInstanceOf(SubjectiveSubmissionResponseDto.class, responseDto);
+
             assertAll(
                     "주관식 제출 처리 검증",
-                    () -> assertThat(responseDto.getIsPending()).isTrue(),
-                    () -> assertThat(responseDto.getFeedback()).isNull(),
-                    () -> assertThat(responseDto.getScore()).isNull(),
+                    () -> assertThat(subjectiveResponse.getIsPending()).isTrue(),
+                    () -> assertThat(subjectiveResponse.getFeedback()).isNull(),
+                    () -> assertThat(subjectiveResponse.getScore()).isNull(),
                     () -> verify(messageQueue, times(1)).enqueue(gradingDataCaptor.capture()),
                     () -> {
                         GradingData capturedData = gradingDataCaptor.getValue();
@@ -287,12 +295,12 @@ class SubmissionServiceUnitTest {
         // given: 존재하지 않는 문제 ID가 주어졌을 때
         when(problemRepository.findById(999L)).thenReturn(Optional.empty());
 
-        SubmissionRequestDto requestDto = new SubmissionRequestDto(999L, "1,2", 60);
+        SubmissionRequestDto requestDto = new SubmissionRequestDto("1,2", 60);
 
         // when & then: 제출 시 예외가 발생한다
         assertAll(
                 "존재하지 않는 문제 제출 검증",
-                () -> assertThrows(ProblemNotFoundException.class, () -> submissionService.submitAnswer(testUser, requestDto)),
+                () -> assertThrows(ProblemNotFoundException.class, () -> submissionService.submitAnswer(testUser, 999L, requestDto)),
                 () -> verify(submissionRepository, never()).save(any(Submission.class))
         );
     }
@@ -315,10 +323,10 @@ class SubmissionServiceUnitTest {
 
         when(submissionRepository.save(any(Submission.class))).thenReturn(savedSubmission);
 
-        SubmissionRequestDto requestDto = new SubmissionRequestDto(1L, "1,3", 120);
+        SubmissionRequestDto requestDto = new SubmissionRequestDto("1,3", 120);
 
         // when: 답안을 제출하면
-        submissionService.submitAnswer(testUser, requestDto);
+        submissionService.submitAnswer(testUser, 1L, requestDto);
 
         // then: 문제 풀이 수가 증가한다
         assertThat(multipleChoiceProblem.getSolvedCount()).isEqualTo(1);
@@ -358,7 +366,6 @@ class SubmissionServiceUnitTest {
                 .category(ProblemCategory.SPRING_AOP)
                 .difficulty(ProblemDifficulty.HARD)
                 .provider(ProblemProvider.AI)
-                .expectedAnswerLength("300-500자")
                 .sampleAnswer("AOP는 관점 지향 프로그래밍으로, 핵심 비즈니스 로직과 공통 관심사(로깅, 트랜잭션 등)를 분리하여 모듈화하는 프로그래밍 패러다임입니다. 스프링에서는 프록시 기반으로 구현되며, @Aspect, @Before, @After 등의 어노테이션을 활용합니다...")
                 .build();
 

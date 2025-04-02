@@ -39,13 +39,14 @@ public class SubmissionService {
      * 사용자 답안 제출 처리
      *
      * @param user       현재 로그인된 사용자
+     * @param problemId  문제 ID
      * @param requestDto 제출 요청 DTO
      * @return 제출 결과 응답 DTO
      */
     @Transactional
-    public SubmissionResponseDto submitAnswer(User user, SubmissionRequestDto requestDto) {
+    public SubmissionResponseDto submitAnswer(User user, Long problemId, SubmissionRequestDto requestDto) {
         // 문제 조회
-        Problem problem = problemRepository.findById(requestDto.getProblemId())
+        Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(ProblemNotFoundException::new);
 
         // 답안 제출 객체 생성
@@ -66,7 +67,13 @@ public class SubmissionService {
             submission.updateMultipleChoiceGradingResult(isCorrect); // 정답 여부 업데이트
 
             if (isCorrect) { // 사용자가 정답을 맞췄다면
-                problem.incrementSolvedCount(); // 문제 풀이 횟수 증가
+                // 사용자가 해당 문제를 이전에 해결한 적이 있는지 확인
+                boolean alreadySolvedByUser = submissionRepository.existsByUserAndProblemIdAndIsCorrectTrue(user, problemId);
+
+                // 문제를 처음 맞춘 경우에만 문제 풀이 횟수 증가
+                if (!alreadySolvedByUser) {
+                    problem.incrementSolvedCount();
+                }
             }
 
         } else { // 주관식 문제인 경우
@@ -74,10 +81,7 @@ public class SubmissionService {
         }
 
         // 응답 생성 및 반환
-        return switch (problem.getType()) {
-            case MULTIPLE_CHOICE -> SubmissionResponseDto.fromMultipleChoice(submission);
-            case SUBJECTIVE -> SubmissionResponseDto.fromSubjective(submission);
-        };
+        return SubmissionResponseDto.fromSubmission(submission);
     }
 
     /**
