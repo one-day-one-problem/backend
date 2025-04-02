@@ -57,9 +57,6 @@ public class SubmissionScheduler {
             Submission submission = submissionRepository.findById(gradingData.getSubmissionId())
                     .orElseThrow(SubmissionNotFoundException::new);
 
-            // 채점 결과 업데이트
-            submission.updateSubjectiveGradingResult(result);
-
             if (result.isCorrect()) { // 해당 제출물이 정답인 경우
                 // 사용자가 해당 문제를 이전에 해결한 적이 있는지 확인
                 boolean alreadySolvedByUser = submissionRepository.existsByUserAndProblemIdAndIsCorrectTrue(submission.getUser(), gradingData.getProblemId());
@@ -74,6 +71,10 @@ public class SubmissionScheduler {
                 }
             }
 
+            // 채점 결과 업데이트
+            submission.updateSubjectiveGradingResult(result);
+
+            // 채점 결과 저장
             submissionRepository.save(submission);
 
             log.info("주관식 문제 제출 #{} 채점 완료: {}점 (정답 여부: {}) / 남은 채점 대기 수: {}", gradingData.getSubmissionId(), result.score(), result.isCorrect(), messageQueue.size());
