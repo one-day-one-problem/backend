@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import site.haruhana.www.dto.BaseResponse;
@@ -56,6 +57,7 @@ public class SubmissionController {
      * @return 필터링된 페이징 처리된 사용자의 문제 풀이 기록 목록
      */
     @GetMapping("/users/{userId}/submissions")
+    @PreAuthorize("isAuthenticated() and #userId == authentication.principal.id")
     public ResponseEntity<BaseResponse<SubmissionPage<SubmissionHistoryResponseDto>>> getSubmissionHistory(
             @PathVariable("userId") Long userId,
             @RequestParam(defaultValue = "0") @Min(0) int page,
