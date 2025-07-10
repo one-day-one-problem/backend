@@ -17,7 +17,15 @@ import java.util.List;
 
 @Entity
 @Getter
-@Table(name = "problems")
+@Table(name = "problems", indexes = {
+        @Index(name = "idx_problems_category_difficulty_type", columnList = "category, difficulty, type"),
+        @Index(name = "idx_problems_status_solved_count", columnList = "status, solved_count"),
+        @Index(name = "idx_problems_category_created_at", columnList = "category, created_at"),
+        @Index(name = "idx_problems_difficulty_created_at", columnList = "difficulty, created_at"),
+        @Index(name = "idx_problems_type_created_at", columnList = "type, created_at"),
+        @Index(name = "idx_problems_solved_count_desc", columnList = "solved_count DESC"),
+        @Index(name = "idx_problems_created_at_desc", columnList = "created_at DESC")
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Problem extends BaseTimeEntity {
 

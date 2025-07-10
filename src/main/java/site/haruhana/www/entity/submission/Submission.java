@@ -17,7 +17,13 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "submissions")
+@Table(name = "submissions", indexes = {
+        @Index(name = "idx_submissions_user_correct_problem", columnList = "user_id, is_correct, problem_id"),
+        @Index(name = "idx_submissions_problem_user_correct", columnList = "problem_id, user_id, is_correct"),
+        @Index(name = "idx_submissions_user_submitted_at", columnList = "user_id, submitted_at"),
+        @Index(name = "idx_submissions_correct_submitted_at", columnList = "is_correct, submitted_at"),
+        @Index(name = "idx_submissions_problem_submitted_at", columnList = "problem_id, submitted_at")
+})
 public class Submission {
 
     /**

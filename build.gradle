@@ -53,6 +53,8 @@ dependencies {
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
 
     // JWT
     implementation 'io.jsonwebtoken:jjwt:0.12.6'
@@ -72,4 +74,15 @@ dependencyManagement {
 
 tasks.named('test') {
     useJUnitPlatform()
+    
+    // 성능 테스트를 위한 메모리 설정
+    jvmArgs = [
+        '-Xmx2g',
+        '-Xms1g',
+        '-XX:+UseG1GC',
+        '-XX:MaxGCPauseMillis=200'
+    ]
+    
+    // 테스트 타임아웃 설정
+    systemProperty 'junit.jupiter.execution.timeout.default', '10m'
 }
