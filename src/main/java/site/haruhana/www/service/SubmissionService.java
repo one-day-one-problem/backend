@@ -2,11 +2,18 @@ package site.haruhana.www.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.haruhana.www.dto.submission.SubmissionPage;
 import site.haruhana.www.dto.submission.request.SubmissionRequestDto;
+import site.haruhana.www.dto.submission.response.SubmissionHistoryResponseDto;
 import site.haruhana.www.dto.submission.response.SubmissionResponseDto;
 import site.haruhana.www.entity.problem.Problem;
+import site.haruhana.www.entity.problem.ProblemCategory;
+import site.haruhana.www.entity.problem.ProblemDifficulty;
 import site.haruhana.www.entity.problem.ProblemType;
 import site.haruhana.www.entity.problem.choice.ProblemOption;
 import site.haruhana.www.entity.submission.Submission;
@@ -155,5 +162,34 @@ public class SubmissionService {
         return submittedOptionIds.containsAll(correctOptionIds);
     }
 
+    /**
+     * 사용자의 문제 풀이 기록을 필터링하여 페이지로 조회하는 메서드
+     *
+     * @param userId     조회할 사용자의 ID
+     * @param page       페이지 번호 (0부터 시작)
+     * @param size       페이지당 항목 수
+     * @param category   카테고리 필터 (선택 사항)
+     * @param difficulty 난이도 필터 (선택 사항)
+     * @param type       문제 유형 필터 (선택 사항)
+     * @param isCorrect  정답 여부 필터 (선택 사항)
+     * @return 필터링된 페이징 처리된 사용자의 문제 풀이 기록 목록
+     */
+    @Transactional(readOnly = true)
+    public SubmissionPage<SubmissionHistoryResponseDto> getSubmissionHistoryByUser(Long userId, int page, int size, ProblemCategory category, ProblemDifficulty difficulty, ProblemType type, Boolean isCorrect) {
+        // 페이지 요청 객체 생성
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        // 문제 답안 제출 기록 조회
+        Page<SubmissionHistoryResponseDto> submissions = submissionRepository.findSubmissionsWithFiltersDirect(
+                userId,
+                category,
+                difficulty,
+                type,
+                isCorrect,
+                pageRequest
+        );
+
+        return new SubmissionPage<>(submissions);
+    }
 }
 
